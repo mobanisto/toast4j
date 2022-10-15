@@ -8,7 +8,6 @@ ext {
     win10_SDK = "C:\\Program Files (x86)\\Windows Kits\\10\\Include\\10.0.22621.0"
     win10_SDK_libs = "C:\\Program Files (x86)\\Windows Kits\\10\\Lib\\10.0.22621.0"
     msvcc = "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.33.31629"
-    wintoast = "C:\\Users\\pc\\github\\ootime\\WinToastWrapper\\WinToastWrapper"
 }
 
 repositories {
@@ -29,7 +28,7 @@ tasks.withType(org.bytedeco.gradle.javacpp.BuildTask) {
             win10_SDK + "\\winrt",
             win10_SDK + "\\cppwinrt",
             msvcc + "\\include",
-            wintoast,
+            "$projectDir\\WinToastWrapper\\WinToastWrapper",
     ]
     linkPath = [
             win10_SDK_libs + "\\um\\x64",
