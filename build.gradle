@@ -1,0 +1,68 @@
+plugins {
+    id 'java-library'
+    id 'org.bytedeco.gradle-javacpp-build' version "1.5.7"
+}
+
+ext {
+    // TODO: find a way not to hardcode those paths here.
+    win10_SDK = "C:\\Program Files (x86)\\Windows Kits\\10\\Include\\10.0.22621.0"
+    win10_SDK_libs = "C:\\Program Files (x86)\\Windows Kits\\10\\Lib\\10.0.22621.0"
+    msvcc = "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.33.31629"
+    wintoast = "C:\\Users\\pc\\github\\ootime\\WinToastWrapper\\WinToastWrapper"
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.bytedeco:javacpp:1.5.7'
+}
+
+tasks.withType(org.bytedeco.gradle.javacpp.BuildTask) {
+    // set here default values for all build tasks below, typically just includePath and linkPath,
+    // but also properties to set the path to the NDK and its compiler in the case of Android
+    includePath = [
+            win10_SDK + "\\um",
+            win10_SDK + "\\shared",
+            win10_SDK + "\\ucrt",
+            win10_SDK + "\\winrt",
+            win10_SDK + "\\cppwinrt",
+            msvcc + "\\include",
+            wintoast,
+    ]
+    linkPath = [
+            win10_SDK_libs + "\\um\\x64",
+            win10_SDK_libs + "\\ucrt\\x64",
+            msvcc + "\\lib\\x64",
+    ]
+    compilerOptions = [
+            "/std:c++17"
+    ]
+}
+
+javacppBuildCommand {
+    // typically set here the buildCommand to the script that fills up includePath and linkPath
+}
+
+javacppBuildParser {
+    // typically set here the classOrPackageNames to class names implementing InfoMap
+    classOrPackageNames = ["icu.ootime.jwintoast.presets.WinToastLib"]
+    outputDirectory = file("$buildDir/javacpp/parser")
+}
+
+javacppBuildCompiler {
+    // typically set here boolean flags like copyLibs
+
+    // Specify output directory here because otherwise the task will put the .obj, .exp and .lib files alongside
+    // the .dll file in build/classes/.../ which are not needed in the end.
+    outputDirectory = file("$buildDir/javacpp/compiler")
+    // To still have the .dll file on the classpath we then need to copy it to the build dir.
+    doLast {
+        copy {
+            from outputDirectory
+            into "$buildDir/resources/main/$javacppPlatform"
+            include "*.dll"
+        }
+    }
+}

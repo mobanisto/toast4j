@@ -24,6 +24,4 @@ public class HString extends Pointer {
     public  native void allocate();
     public  native void allocate(@StdWString CharPointer charPointer);
 
-
-
 }

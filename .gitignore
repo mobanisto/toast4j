@@ -24,3 +24,6 @@ hs_err_pid*
 .idea
 _config.yml
 CNAME
+
+/.gradle/
+/build/
