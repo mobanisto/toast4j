@@ -1,6 +1,7 @@
 plugins {
     id 'java-library'
     id 'org.bytedeco.gradle-javacpp-build' version "1.5.7"
+    id 'maven-publish'
 }
 
 ext {
@@ -16,6 +17,24 @@ repositories {
 
 dependencies {
     implementation 'org.bytedeco:javacpp:1.5.7'
+}
+
+java {
+    withSourcesJar()
+}
+
+// Define this manually, otherwise the javacpp build plugin will ship a jar file that includes .obj, .exp and .lib
+// files and duplicates the dll file at icu/ootime/jwintoast/windows-x86_64/
+publishing {
+    publications {
+        maven(MavenPublication) {
+            groupId = 'icu.ootime'
+            artifactId = 'jwintoast'
+            version = '0.1'
+
+            from components.java
+        }
+    }
 }
 
 tasks.withType(org.bytedeco.gradle.javacpp.BuildTask) {
