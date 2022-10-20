@@ -7,18 +7,32 @@ import org.bytedeco.javacpp.annotation.*;
 
 @NoOffset
 @Properties(inherit = WinToastLib.class)
-//@Namespace("WinToastLib")
+// @Namespace("WinToastLib")
 public class IWinToastHandler extends Pointer {
     static {
         Loader.load();
     }
-    public IWinToastHandler(){
+
+    public IWinToastHandler() {
         allocate();
     }
-    public  native void allocate();
-    public   @Virtual(true) @Const({false,false,true}) native void toastActivated();
-    public   @Virtual(true) @Const({false,false,true}) native void toastActivated(int actionIndex);
-    public  @Virtual(true) @Const({false,false,true}) native void toastDismissed(@Cast("IWinToastHandler::WinToastDismissalReason") int state);
-    public  @Virtual(true)  @Const({false,false,true}) native void toastFailed();
+
+    public native void allocate();
+
+    public @Virtual(true)
+    @Const({false, false, true})
+    native void toastActivated();
+
+    public @Virtual(true)
+    @Const({false, false, true})
+    native void toastActivated(int actionIndex);
+
+    public @Virtual(true)
+    @Const({false, false, true})
+    native void toastDismissed(@Cast("IWinToastHandler::WinToastDismissalReason") int state);
+
+    public @Virtual(true)
+    @Const({false, false, true})
+    native void toastFailed();
 
 }

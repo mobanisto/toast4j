@@ -12,21 +12,17 @@ import org.bytedeco.javacpp.tools.InfoMapper;
         global = "icu.ootime.jwintoast.global.WinToastLib",
         value = {
                 @Platform(
-//                       define = "NDEBUG",
+                        // define = "NDEBUG",
                         value = {
                                 "windows-x86",
                                 "windows-x86_64"
                         },
-//                        cinclude = "wintoastlib.h",
-                        include ={"wintoastlib.cpp","DesktopNotificationManagerCompat.cpp"}
-//                        includepath ={"D:\\Project\\WinToastWrapper\\WinToastWrapper",
-////                                "/winrt",
-//                                "D:/Windows Kits/10/Include/10.0.17763.0/um",
-//                                "D:/Windows Kits/10/Include/10.0.17763.0/shared",
-//                                 "D:/Windows Kits/10/Include/10.0.17763.0/ucrt",
-//                        "D:/Windows Kits/10/Include/10.0.17763.0/cppwinrt",
-//                        "D:\\DevelopmentTool\\MicrosoftVisualStudio\\VisualStudio2017\\VC\\Tools\\MSVC\\14.16.27023\\include"}
-//                        ,library = "jniWinToastLib"
+                        // cinclude = "wintoastlib.h",
+                        // library = "jniWinToastLib"
+                        include = {
+                                "wintoastlib.cpp",
+                                "DesktopNotificationManagerCompat.cpp"
+                        }
                 )
         }
 )
@@ -51,8 +47,8 @@ public class WinToastLib implements InfoMapper {
                 "DesktopNotificationManagerCompat::get_History",
                 "DesktopNotificationManagerCompat::CanUseHttpImages").skip());
         infoMap.put(new Info(
-                "DllImporter::f_SetCurrentProcessExplicitAppUserModelID"
-                ,"DllImporter::f_PropVariantToString",
+                "DllImporter::f_SetCurrentProcessExplicitAppUserModelID",
+                "DllImporter::f_PropVariantToString",
                 "DllImporter::f_RoGetActivationFactory",
                 "DllImporter::f_WindowsCreateStringReference",
                 "DllImporter::f_WindowsGetStringRawBuffer",
@@ -60,7 +56,7 @@ public class WinToastLib implements InfoMapper {
                 "DllImporter::initialize"
         ).skip());
 
-        infoMap.put(new Info("DEFAULT_SHELL_LINKS_PATH","DEFAULT_LINK_FORMAT","STATUS_SUCCESS").define(false).skip());
+        infoMap.put(new Info("DEFAULT_SHELL_LINKS_PATH", "DEFAULT_LINK_FORMAT", "STATUS_SUCCESS").define(false).skip());
         infoMap.put(new Info("Util::getRealOSVersion",
                 "Util::defaultExecutablePath",
                 "Util::defaultShellLinksDirectory",
@@ -71,7 +67,6 @@ public class WinToastLib implements InfoMapper {
                 "Util::addAttribute",
                 "Util::createElement"
         ).skip());
-
 
         infoMap.put(new Info("RtlGetVersionPtr").pointerTypes("RtlGetVersionPtr").skip());
         infoMap.put(new Info("WinToastStringWrapper").pointerTypes("WinToastStringWrapper").skip());
@@ -84,9 +79,7 @@ public class WinToastLib implements InfoMapper {
         infoMap.put(new Info("f_RoGetActivationFactory").pointerTypes("f_RoGetActivationFactory").skip());
         infoMap.put(new Info("f_PropVariantToString").pointerTypes("f_PropVariantToString").skip());
 
-
-
-        //        infoMap.put(new Info("IWinToastHandler").purify(false).virtualize());
-//        infoMap.put(new Info("WinToastLib::IWinToastHandler::toastActivated").annotations("const "));
+        // infoMap.put(new Info("IWinToastHandler").purify(false).virtualize());
+        // infoMap.put(new Info("WinToastLib::IWinToastHandler::toastActivated").annotations("const "));
     }
 }

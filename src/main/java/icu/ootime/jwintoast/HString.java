@@ -1,6 +1,5 @@
 package icu.ootime.jwintoast;
 
-
 import icu.ootime.jwintoast.presets.WinToastLib;
 import org.bytedeco.javacpp.CharPointer;
 import org.bytedeco.javacpp.Loader;
@@ -15,13 +14,17 @@ public class HString extends Pointer {
     static {
         Loader.load();
     }
-    public HString(){
+
+    public HString() {
         allocate();
     }
-    public HString(@StdWString CharPointer charPointer){
+
+    public HString(@StdWString CharPointer charPointer) {
         allocate(charPointer);
     }
-    public  native void allocate();
-    public  native void allocate(@StdWString CharPointer charPointer);
+
+    public native void allocate();
+
+    public native void allocate(@StdWString CharPointer charPointer);
 
 }
