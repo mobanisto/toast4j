@@ -1,4 +1,4 @@
-package icu.ootime.jwintoast.helper;
+package de.mobanisto.wintoast.helper;
 
 public class ToastHandle {
 

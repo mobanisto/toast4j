@@ -1,9 +1,9 @@
-package icu.ootime.jwintoast.helper;
+package de.mobanisto.wintoast.helper;
 
-import icu.ootime.jwintoast.Aumi;
-import icu.ootime.jwintoast.IWinToastHandler;
-import icu.ootime.jwintoast.WinToast;
-import icu.ootime.jwintoast.WinToastTemplate;
+import de.mobanisto.wintoast.WinToast;
+import de.mobanisto.wintoast.WinToastTemplate;
+import de.mobanisto.wintoast.Aumi;
+import de.mobanisto.wintoast.IWinToastHandler;
 import org.bytedeco.javacpp.CharPointer;
 import org.bytedeco.javacpp.IntPointer;
 

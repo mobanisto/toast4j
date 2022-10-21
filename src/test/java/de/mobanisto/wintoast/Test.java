@@ -1,6 +1,7 @@
-import icu.ootime.jwintoast.Aumi;
-import icu.ootime.jwintoast.helper.ToastHandle;
-import icu.ootime.jwintoast.helper.WinToastHelper;
+package de.mobanisto.wintoast;
+
+import de.mobanisto.wintoast.helper.ToastHandle;
+import de.mobanisto.wintoast.helper.WinToastHelper;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;

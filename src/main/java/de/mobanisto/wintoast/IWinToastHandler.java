@@ -1,6 +1,6 @@
-package icu.ootime.jwintoast;
+package de.mobanisto.wintoast;
 
-import icu.ootime.jwintoast.presets.WinToastLib;
+import de.mobanisto.wintoast.presets.WinToastLib;
 import org.bytedeco.javacpp.Loader;
 import org.bytedeco.javacpp.Pointer;
 import org.bytedeco.javacpp.annotation.*;

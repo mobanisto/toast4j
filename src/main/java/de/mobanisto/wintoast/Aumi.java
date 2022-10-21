@@ -1,4 +1,4 @@
-package icu.ootime.jwintoast;
+package de.mobanisto.wintoast;
 
 public class Aumi {
 

@@ -24,13 +24,13 @@ java {
 }
 
 // Define this manually, otherwise the javacpp build plugin will ship a jar file that includes .obj, .exp and .lib
-// files and duplicates the dll file at icu/ootime/jwintoast/windows-x86_64/
+// files and duplicates the dll file at de/mobanisto/wintoast/windows-x86_64/
 publishing {
     publications {
         maven(MavenPublication) {
-            groupId = 'icu.ootime'
-            artifactId = 'jwintoast'
-            version = '0.1'
+            groupId = 'de.mobanisto'
+            artifactId = 'wintoast'
+            version = '0.1.0'
 
             from components.java
         }
@@ -65,7 +65,7 @@ javacppBuildCommand {
 
 javacppBuildParser {
     // typically set here the classOrPackageNames to class names implementing InfoMap
-    classOrPackageNames = ["icu.ootime.jwintoast.presets.WinToastLib"]
+    classOrPackageNames = ["de.mobanisto.wintoast.presets.WinToastLib"]
     outputDirectory = file("$buildDir/javacpp/parser")
 }
 
