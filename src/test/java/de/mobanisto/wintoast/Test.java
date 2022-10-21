@@ -12,10 +12,10 @@ public class Test {
         WinToastHelper toastHelper = new WinToastHelper("WinToast");
         Path cwd = Paths.get(System.getProperty("user.dir"));
         String image = cwd.resolve("example/terminal.png").toAbsolutePath().toString();
-        ToastHandle toast1 = toastHelper.showToast("Foo", image);
+        ToastHandle toast1 = toastHelper.showTextToast("Foo", "Something important");
         Thread.sleep(2000);
         toast1.hide();
-        ToastHandle toast2 = toastHelper.showToast("Bar", image);
+        ToastHandle toast2 = toastHelper.showImageToast("Bar", "Goodbye", image);
         Thread.sleep(5000);
         toast2.hide();
     }

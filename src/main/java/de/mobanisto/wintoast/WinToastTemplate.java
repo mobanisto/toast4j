@@ -77,13 +77,13 @@ public class WinToastTemplate extends Pointer {
      * enum WinToastLib::WinToastTemplate::WinToastTemplateType
      */
     public static class WinToastTemplateType {
-        public static final int TOASTIMAGEANDTEXT01 = 0,
-                TOASTIMAGEANDTEXT02 = 1,
-                TOASTIMAGEANDTEXT03 = 2,
-                TOASTIMAGEANDTEXT04 = 3;
-        public static final int TOASTTEXT01 = 4,
-                TOASTTEXT02 = 5,
-                TOASTTEXT03 = 6,
-                TOASTTEXT04 = 7;
+        public static final int ToastImageAndText01 = 0,
+                ToastImageAndText02 = 1,
+                ToastImageAndText03 = 2,
+                ToastImageAndText04 = 3;
+        public static final int ToastText01 = 4,
+                ToastText02 = 5,
+                ToastText03 = 6,
+                ToastText04 = 7;
     }
 }

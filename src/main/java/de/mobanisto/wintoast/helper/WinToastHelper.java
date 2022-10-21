@@ -19,6 +19,28 @@ public class WinToastHelper {
         System.out.println("initialize: " + winToast.initialize());
     }
 
+    private IWinToastHandler iWinToastHandler = new IWinToastHandler() {
+        @Override
+        public void toastActivated() {
+            System.out.println("toast activated");
+        }
+
+        @Override
+        public void toastActivated(int actionIndex) {
+            System.out.println("toast activated: " + actionIndex);
+        }
+
+        @Override
+        public void toastDismissed(int state) {
+            System.out.println("toast dismissed: " + state);
+        }
+
+        @Override
+        public void toastFailed() {
+            System.out.println("toast failed");
+        }
+    };
+
     public WinToastHelper(Aumi aumi, String appName) {
         winToast = WinToast.instance();
         winToast.setAppName(new CharPointer(appName));
@@ -30,36 +52,31 @@ public class WinToastHelper {
         System.out.println("initialize: " + winToast.initialize());
     }
 
-    public ToastHandle showToast(String message, String image) {
+    public ToastHandle showTextToast(String line1, String line2) {
         WinToastTemplate winToastTemplate =
-                new WinToastTemplate(WinToastTemplate.WinToastTemplateType.TOASTIMAGEANDTEXT02);
+                new WinToastTemplate(WinToastTemplate.WinToastTemplateType.ToastText02);
         System.out.println("template address: " + winToastTemplate.address());
-        winToastTemplate.setTextField(new CharPointer(message), WinToastTemplate.TextField.FirstLine);
-        winToastTemplate.setImagePath(new CharPointer(image));
+        winToastTemplate.setTextField(new CharPointer(line1), WinToastTemplate.TextField.FirstLine);
+        winToastTemplate.setTextField(new CharPointer(line2), WinToastTemplate.TextField.SecondLine);
         winToastTemplate.setAudioOption(WinToastTemplate.AudioOption.Silent);
         winToastTemplate.setExpiration(10000);
 
-        IWinToastHandler iWinToastHandler = new IWinToastHandler() {
-            @Override
-            public void toastActivated() {
-                System.out.println("toast activated");
-            }
+        IntPointer errorCode = new IntPointer(0);
+        long uid = winToast.showToast(winToastTemplate, iWinToastHandler, errorCode);
+        System.out.println("toast uid: " + uid);
+        System.out.println("error code: " + winToast.strerror(errorCode.get()).getString());
+        return new ToastHandle(this, uid);
+    }
 
-            @Override
-            public void toastActivated(int actionIndex) {
-                System.out.println("toast activated: " + actionIndex);
-            }
-
-            @Override
-            public void toastDismissed(int state) {
-                System.out.println("toast dismissed: " + state);
-            }
-
-            @Override
-            public void toastFailed() {
-                System.out.println("toast failed");
-            }
-        };
+    public ToastHandle showImageToast(String line1, String line2, String image) {
+        WinToastTemplate winToastTemplate =
+                new WinToastTemplate(WinToastTemplate.WinToastTemplateType.ToastImageAndText02);
+        System.out.println("template address: " + winToastTemplate.address());
+        winToastTemplate.setTextField(new CharPointer(line1), WinToastTemplate.TextField.FirstLine);
+        winToastTemplate.setTextField(new CharPointer(line2), WinToastTemplate.TextField.SecondLine);
+        winToastTemplate.setImagePath(new CharPointer(image));
+        winToastTemplate.setAudioOption(WinToastTemplate.AudioOption.Silent);
+        winToastTemplate.setExpiration(10000);
 
         IntPointer errorCode = new IntPointer(0);
         long uid = winToast.showToast(winToastTemplate, iWinToastHandler, errorCode);
