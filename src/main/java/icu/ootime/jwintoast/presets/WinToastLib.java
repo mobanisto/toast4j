@@ -12,7 +12,7 @@ import org.bytedeco.javacpp.tools.InfoMapper;
         global = "icu.ootime.jwintoast.global.WinToastLib",
         value = {
                 @Platform(
-                        // define = "NDEBUG",
+                        define = "NDEBUG",
                         value = {
                                 "windows-x86",
                                 "windows-x86_64"
@@ -21,7 +21,6 @@ import org.bytedeco.javacpp.tools.InfoMapper;
                         // library = "jniWinToastLib"
                         include = {
                                 "wintoastlib.cpp",
-                                "DesktopNotificationManagerCompat.cpp"
                         }
                 )
         }
@@ -31,21 +30,6 @@ public class WinToastLib implements InfoMapper {
     public void map(InfoMap infoMap) {
         infoMap.put(new Info("WinToastLib").pointerTypes("WinToastLib").skip());
 
-        infoMap.put(new Info("DesktopNotificationManagerCompat::RegisterComServer",
-                "DesktopNotificationManagerCompat::EnsureRegistered",
-                "DesktopNotificationManagerCompat::IsRunningAsUwp",
-                "DesktopNotificationManagerCompat::s_registeredAumidAndComServer",
-                "DesktopNotificationManagerCompat::s_aumid",
-                "DesktopNotificationManagerCompat::s_registeredActivator",
-                "DesktopNotificationManagerCompat::s_hasCheckedIsRunningAsUwp",
-                "DesktopNotificationManagerCompat::s_isRunningAsUwp",
-                "DesktopNotificationManagerCompat::RegisterAumidAndComServer",
-                "DesktopNotificationManagerCompat::RegisterActivator",
-                "DesktopNotificationManagerCompat::CreateToastNotifier",
-                "DesktopNotificationManagerCompat::CreateXmlDocumentFromString",
-                "DesktopNotificationManagerCompat::CreateToastNotification",
-                "DesktopNotificationManagerCompat::get_History",
-                "DesktopNotificationManagerCompat::CanUseHttpImages").skip());
         infoMap.put(new Info(
                 "DllImporter::f_SetCurrentProcessExplicitAppUserModelID",
                 "DllImporter::f_PropVariantToString",

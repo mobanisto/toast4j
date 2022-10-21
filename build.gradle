@@ -47,7 +47,7 @@ tasks.withType(org.bytedeco.gradle.javacpp.BuildTask) {
             win10_SDK + "\\winrt",
             win10_SDK + "\\cppwinrt",
             msvcc + "\\include",
-            "$projectDir\\WinToastWrapper\\WinToastWrapper",
+            "$projectDir\\WinToast",
     ]
     linkPath = [
             win10_SDK_libs + "\\um\\x64",

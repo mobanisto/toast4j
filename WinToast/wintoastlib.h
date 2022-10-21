@@ -38,11 +38,6 @@
 #include <string.h>
 #include <vector>
 #include <map>
-//increase
-#include "winrt/base.h"
-#include "winrt/Windows.Foundation.Collections.h"
-#include <winrt/Windows.UI.Notifications.h>
-//increase
 using namespace Microsoft::WRL;
 using namespace ABI::Windows::Data::Xml::Dom;
 using namespace ABI::Windows::Foundation;
@@ -84,10 +79,10 @@ namespace WinToastLib {
 
         enum AudioSystemFile {
             DefaultSound,
-            IM,
+            IM, 
             Mail,
-            Reminder,
-            SMS,
+            Reminder, 
+            SMS, 
             Alarm,
             Alarm2,
             Alarm3,
@@ -127,8 +122,6 @@ namespace WinToastLib {
         void setDuration(_In_ Duration duration);
         void setExpiration(_In_ INT64 millisecondsFromNow);
         void addAction(_In_ const std::wstring& label);
-		void LoadStringToXml(_In_ const std::wstring& xml);//increase
-		void setInitNotificationData(_In_ std::map<winrt::hstring, winrt::hstring> dataMap);//increase
 
         std::size_t textFieldsCount() const;
         std::size_t actionsCount() const;
@@ -143,8 +136,6 @@ namespace WinToastLib {
         WinToastTemplateType type() const;
         WinToastTemplate::AudioOption audioOption() const;
         Duration duration() const;
-		const std::wstring& getStringToXml() const; //increase
-		const std::map<winrt::hstring, winrt::hstring>& getInitNotificationData() const;
     private:
         std::vector<std::wstring>			_textFields{};
         std::vector<std::wstring>           _actions{};
@@ -155,8 +146,6 @@ namespace WinToastLib {
         AudioOption                         _audioOption{WinToastTemplate::AudioOption::Default};
         WinToastTemplateType                _type{WinToastTemplateType::Text01};
         Duration                            _duration{Duration::System};
-		std::wstring							_string_xml{}; //increase
-		std::map<winrt::hstring, winrt::hstring>		_initDataMap; //increase
     };
 
     class WinToast {
@@ -198,19 +187,13 @@ namespace WinToastLib {
         virtual bool isInitialized() const;
         virtual bool hideToast(_In_ INT64 id);
         virtual INT64 showToast(_In_ const WinToastTemplate& toast, _In_ IWinToastHandler* handler, _Out_ WinToastError* error = nullptr);
-		virtual NotificationUpdateResult update(_In_ std::map<winrt::hstring, winrt::hstring> dataMap, _Out_ WinToastError* error);//increase
-
-		virtual void clear();
+        virtual void clear();
         virtual enum ShortcutResult createShortcut();
 
         const std::wstring& appName() const;
         const std::wstring& appUserModelId() const;
-		const std::wstring& appTag() const;//increase
-		const std::wstring& appGroup() const;//increase
         void setAppUserModelId(_In_ const std::wstring& aumi);
         void setAppName(_In_ const std::wstring& appName);
-		void setAppTag(_In_ const std::wstring& appTag);
-		void setAppGroup(_In_ const std::wstring& appGroup);
 
     protected:
         bool											_isInitialized{false};
@@ -218,8 +201,6 @@ namespace WinToastLib {
         std::wstring                                    _appName{};
         std::wstring                                    _aumi{};
         std::map<INT64, ComPtr<IToastNotification>>     _buffer{};
-		std::wstring                                    _appTag{};//increase
-		std::wstring                                    _appGroup{};//increase
 
         HRESULT validateShellLinkHelper(_Out_ bool& wasChanged);
         HRESULT createShellLinkHelper();
@@ -230,11 +211,7 @@ namespace WinToastLib {
         HRESULT addActionHelper(_In_ IXmlDocument *xml, _In_ const std::wstring& action, _In_ const std::wstring& arguments);
         HRESULT addDurationHelper(_In_ IXmlDocument *xml, _In_ const std::wstring& duration);
         ComPtr<IToastNotifier> notifier(_In_ bool* succeded) const;
-		ComPtr<IToastNotifier2> notifier2(_In_ bool* succeded) const;//increase
-		ComPtr<IToastNotification2> notification2(ComPtr<IToastNotification> nf) const;//increase
-		ComPtr<IToastNotification4> notification4(ComPtr<IToastNotification> notification) const;
-	    void setError(_Out_ WinToastError* error, _In_ WinToastError value);
-		void setUpTheInitNotificationData(ComPtr<IToastNotification> nf, _In_ std::map<winrt::hstring, winrt::hstring> dataMap);
+        void setError(_Out_ WinToastError* error, _In_ WinToastError value);
     };
 }
 #endif // WINTOASTLIB_H

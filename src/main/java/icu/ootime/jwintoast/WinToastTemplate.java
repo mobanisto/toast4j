@@ -33,6 +33,8 @@ public class WinToastTemplate extends Pointer {
 
     public native void setFirstLine(@Const @StdWString CharPointer text);
 
+    public native void setAudioOption(@Cast("WinToastTemplate::AudioOption") int audioOption);
+
     public native void setTextField(@Const @StdWString CharPointer text, @Cast("WinToastTemplate::TextField") int FirstLine);
 
     public native void addAction(@Const @StdWString CharPointer label);
@@ -44,10 +46,6 @@ public class WinToastTemplate extends Pointer {
     public native void setImagePath(@Const @StdWString CharPointer imagepath);
 
     public native void setExpiration(int millisecondsFromNow);
-
-    public native void LoadStringToXml(@Const @StdWString CharPointer strxml);
-
-    public native void setInitNotificationData(@ByRef HStringMap hStringMap);
 
     @Override
     public WinToastTemplate position(long position) {

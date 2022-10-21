@@ -20,20 +20,12 @@ public class WinToast extends Pointer {
 
     public static native WinToast instance();
 
-    public native @Cast("uint32_t") int showToast(
+    public native @Cast("uint32_t") long showToast(
             @Const @ByRef WinToastTemplate winToastTemplate,
             IWinToastHandler iWinToastHandler,
             @Cast("WinToastLib::WinToast::WinToastError *") IntPointer erro);
 
-    // public native void notifier2(@Cast("bool *") boolean sessed, @ByRef HString hString);
-
     public native void setAppName(@Const @StdWString CharPointer name);
-
-    public native void setAppTag(@Const @StdWString CharPointer tagname);
-
-    public native void setAppGroup(@Const @StdWString CharPointer groupname);
-
-    public native @Cast("::NotificationUpdateResult") int update(@ByRef HStringMap hStringMap, @Cast("WinToastLib::WinToast::WinToastError *") IntPointer erro);
 
     public native @StdWString CharPointer configureAUMI(@Const @StdWString CharPointer companyName,
                                                         @Const @StdWString CharPointer productName,
@@ -53,9 +45,7 @@ public class WinToast extends Pointer {
 
     public native boolean isSupportingModernFeatures();
 
-    public native boolean hideToast(int id);
-
-    // public native @Cast("uint32_t") int showToast(@Const @ByRef WinToastTemplate winToastTemplate, @ByRef IWinToastHandler handler);
+    public native boolean hideToast(long id);
 
     public native void allocate();
 

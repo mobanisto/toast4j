@@ -18,9 +18,7 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-
 #include "wintoastlib.h"
-#include "DesktopNotificationManagerCompat.h"
 #include <memory>
 #include <assert.h>
 #include <unordered_map>
@@ -43,7 +41,6 @@
 // Quickstart: Handling toast activations from Win32 apps in Windows 10
 // https://blogs.msdn.microsoft.com/tiles_and_toasts/2015/10/16/quickstart-handling-toast-activations-from-win32-apps-in-windows-10/
 using namespace WinToastLib;
-using namespace DesktopNotificationManagerCompat;
 namespace DllImporter {
 
     // Function load a function from library
@@ -384,15 +381,6 @@ WinToast::~WinToast() {
     }
 }
 
-void WinToast::setAppTag(_In_ const std::wstring& appTag) {
-	_appTag = appTag;
-}
-
-void WinToast::setAppGroup(_In_ const std::wstring& appGroup) {
-	_appGroup = appGroup;
-}
-
-
 void WinToast::setAppName(_In_ const std::wstring& appName) {
     _appName = appName;
 }
@@ -532,12 +520,6 @@ const std::wstring& WinToast::appUserModelId() const {
     return _aumi;
 }
 
-const std::wstring& WinToast::appTag() const {
-	return _appTag;
-}
-const std::wstring& WinToast::appGroup() const {
-	return _appGroup;
-}
 
 HRESULT	WinToast::validateShellLinkHelper(_Out_ bool& wasChanged) {
 	WCHAR	path[MAX_PATH] = { L'\0' };
@@ -652,6 +634,7 @@ INT64 WinToast::showToast(_In_ const WinToastTemplate& toast, _In_  IWinToastHan
         DEBUG_MSG("Error when launching the toast. Handler cannot be nullptr.");
         return id;
     }
+
     ComPtr<IToastNotificationManagerStatics> notificationManager;
     HRESULT hr = DllImporter::Wrap_GetActivationFactory(WinToastStringWrapper(RuntimeClass_Windows_UI_Notifications_ToastNotificationManager).Get(), &notificationManager);
     if (SUCCEEDED(hr)) {
@@ -662,14 +645,7 @@ INT64 WinToast::showToast(_In_ const WinToastTemplate& toast, _In_  IWinToastHan
             hr = DllImporter::Wrap_GetActivationFactory(WinToastStringWrapper(RuntimeClass_Windows_UI_Notifications_ToastNotification).Get(), &notificationFactory);
             if (SUCCEEDED(hr)) {
 				ComPtr<IXmlDocument> xmlDocument;
-				HRESULT hr;
-				//update
-				if (!toast.getStringToXml().empty()) {
-					hr = CreateXmlDocumentFromString(toast.getStringToXml().c_str(),&xmlDocument);
-				}
-				else {
-					hr = notificationManager->GetTemplateContent(ToastTemplateType(toast.type()), &xmlDocument);
-				}
+				HRESULT hr = notificationManager->GetTemplateContent(ToastTemplateType(toast.type()), &xmlDocument);
                 if (SUCCEEDED(hr)) {
                     for (std::size_t i = 0, fieldsCount = toast.textFieldsCount(); i < fieldsCount && SUCCEEDED(hr); i++) {
                         hr = setTextFieldHelper(xmlDocument.Get(), toast.textField(WinToastTemplate::TextField(i)), i);
@@ -732,22 +708,7 @@ INT64 WinToast::showToast(_In_ const WinToastTemplate& toast, _In_  IWinToastHan
                                         id = guid.Data1;
                                         _buffer[id] = notification;
                                         DEBUG_MSG("xml: " << Util::AsString(xmlDocument));
-										if (!toast.getStringToXml().empty()) {//increase
-											auto succeded = false;
-											ComPtr<IToastNotification2> notification2_f= notification2(notification);
-											if (!appTag().empty()) {
-												notification2_f->put_Tag(WinToastStringWrapper(appTag()).Get());
-											}
-											if (!appGroup().empty()) {
-												notification2_f->put_Group(WinToastStringWrapper(appGroup()).Get());
-											}
-											if (!toast.getInitNotificationData().empty()) {
-												setUpTheInitNotificationData(notification, toast.getInitNotificationData());
-											}
-										}
-										//else {
-										hr = notifier->Show(notification.Get());
-										//}
+                                        hr = notifier->Show(notification.Get());
                                         if (FAILED(hr)) {
                                             setError(error, WinToastError::NotDisplayed);
                                         }
@@ -772,67 +733,6 @@ ComPtr<IToastNotifier> WinToast::notifier(_In_ bool* succeded) const  {
 	}
 	*succeded = SUCCEEDED(hr);
 	return notifier;
-}
-
-ComPtr<IToastNotifier2> WinToast::notifier2(_In_ bool* succeded) const {
-	ComPtr<IToastNotifier> notifier_temp = notifier(succeded);
-	ComPtr<IToastNotifier2> notifier2_temp;
-	notifier_temp.As(&notifier2_temp);
-	return notifier2_temp;
-}
-
-ComPtr<IToastNotification2> WinToast::notification2(ComPtr<IToastNotification> notification) const {
-	ComPtr<IToastNotification2> notification2_temp;
-	notification.As(&notification2_temp);
-	return notification2_temp;
-}
-
-ComPtr<IToastNotification4> WinToast::notification4(ComPtr<IToastNotification> notification) const {
-	ComPtr<IToastNotification4> notification4_temp;
-	notification.As(&notification4_temp);
-	return notification4_temp;
-}
-void  WinToast::setUpTheInitNotificationData(ComPtr<IToastNotification> notification, _In_ std::map<winrt::hstring, winrt::hstring> dataMap) {
-	winrt::param::iterable<winrt::Windows::Foundation::Collections::IKeyValuePair<winrt::hstring, winrt::hstring>> dataiterable(dataMap);
-	using namespace winrt::Windows::UI::Notifications;
-	winrt::Windows::UI::Notifications::NotificationData notif_data(dataiterable);
-	ABI::Windows::UI::Notifications::INotificationData* notif_data_temp_f{
-		nullptr
-	};
-	winrt::copy_to_abi(notif_data, *reinterpret_cast<void**>(&notif_data_temp_f));
-
-	ComPtr<ABI::Windows::UI::Notifications::IToastNotification4> n4 = notification4(notification);
-	n4->put_Data(notif_data_temp_f);
-}
-
-//
-NotificationUpdateResult WinToast::update(_In_ std::map<winrt::hstring, winrt::hstring> dataMap, _Out_ WinToastError* error) {
-	auto succeded = false;
-	ComPtr<IToastNotifier2> notifier2_f = notifier2(&succeded);
-	NotificationUpdateResult result;
-	HRESULT hr;
-	if (succeded) {
-		winrt::param::iterable<winrt::Windows::Foundation::Collections::IKeyValuePair<winrt::hstring, winrt::hstring>> dataiterable(dataMap);
-		using namespace winrt::Windows::UI::Notifications;
-		winrt::Windows::UI::Notifications::NotificationData notif_data(dataiterable);
-		ABI::Windows::UI::Notifications::INotificationData* notif_data_temp_f{
-			nullptr
-		};
-		winrt::copy_to_abi(notif_data, *reinterpret_cast<void**>(&notif_data_temp_f));
-		if (!appGroup().empty()&&!appTag().empty()) {
-			hr=notifier2_f->UpdateWithTagAndGroup(notif_data_temp_f, WinToastStringWrapper(appTag()).Get(), WinToastStringWrapper(appGroup()).Get(), &result);
-		}
-		else if (!appTag().empty()) {
-			hr=notifier2_f->UpdateWithTag(notif_data_temp_f, WinToastStringWrapper(appTag()).Get(),&result);
-		}
-	}
-	if(!SUCCEEDED(hr)){
-		setError(error, WinToastError::UnknownError);
-	}
-	else {
-		setError(error, WinToastError::NoError);
-	}
-	return result;
 }
 
 bool WinToast::hideToast(_In_ INT64 id) {
@@ -934,7 +834,7 @@ HRESULT WinToast::setTextFieldHelper(_In_ IXmlDocument *xml, _In_ const std::wst
     if (SUCCEEDED(hr)) {
         ComPtr<IXmlNode> node;
         hr = nodeList->Item(pos, &node);
-        if (SUCCEEDED(hr)&& node!=NULL) {//perfect
+        if (SUCCEEDED(hr)) {
             hr = Util::setNodeStringValue(text, node.Get(), xml);
         }
     }
@@ -953,7 +853,7 @@ HRESULT WinToast::setImageFieldHelper(_In_ IXmlDocument *xml, _In_ const std::ws
         if (SUCCEEDED(hr)) {
             ComPtr<IXmlNode> node;
             hr = nodeList->Item(0, &node);
-            if (SUCCEEDED(hr)&& node!=NULL)  {//perfect
+            if (SUCCEEDED(hr))  {
                 ComPtr<IXmlNamedNodeMap> attributes;
                 hr = node->get_Attributes(&attributes);
                 if (SUCCEEDED(hr)) {
@@ -1081,7 +981,7 @@ HRESULT WinToast::addActionHelper(_In_ IXmlDocument *xml, _In_ const std::wstrin
 void WinToast::setError(_Out_ WinToastError* error, _In_ WinToastError value) {
     if (error) {
         *error = value;
-    }
+    } 
 }
 
 WinToastTemplate::WinToastTemplate(_In_ WinToastTemplateType type) : _type(type) {
@@ -1172,13 +1072,6 @@ void WinToastTemplate::setAttributionText(_In_ const std::wstring& attributionTe
 void WinToastTemplate::addAction(_In_ const std::wstring & label) {
 	_actions.push_back(label);
 }
-void WinToastTemplate::LoadStringToXml(_In_ const std::wstring & strxml) {
-	_string_xml = strxml;
-}
-
-void WinToastTemplate::setInitNotificationData(_In_ std::map<winrt::hstring, winrt::hstring> dataMap) {
-	_initDataMap = dataMap;
-}
 
 std::size_t WinToastTemplate::textFieldsCount() const {
     return _textFields.size();
@@ -1234,14 +1127,3 @@ WinToastTemplate::AudioOption WinToastTemplate::audioOption() const {
 WinToastTemplate::Duration WinToastTemplate::duration() const {
     return _duration;
 }
-//increase
-const std::wstring& WinToastTemplate::getStringToXml() const {
-	return _string_xml;
-}
-
-//increase
-const std::map<winrt::hstring, winrt::hstring>& WinToastTemplate::getInitNotificationData() const {
-	return _initDataMap;
-}
-
-
