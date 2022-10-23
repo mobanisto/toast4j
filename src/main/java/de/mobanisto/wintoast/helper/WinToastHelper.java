@@ -1,9 +1,9 @@
 package de.mobanisto.wintoast.helper;
 
-import de.mobanisto.wintoast.WinToast;
-import de.mobanisto.wintoast.WinToastTemplate;
 import de.mobanisto.wintoast.Aumi;
 import de.mobanisto.wintoast.IWinToastHandler;
+import de.mobanisto.wintoast.WinToast;
+import de.mobanisto.wintoast.WinToastTemplate;
 import org.bytedeco.javacpp.CharPointer;
 import org.bytedeco.javacpp.IntPointer;
 

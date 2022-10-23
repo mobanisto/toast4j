@@ -35,7 +35,8 @@ public class WinToastTemplate extends Pointer {
 
     public native void setAudioOption(@Cast("WinToastTemplate::AudioOption") int audioOption);
 
-    public native void setTextField(@Const @StdWString CharPointer text, @Cast("WinToastTemplate::TextField") int FirstLine);
+    public native void setTextField(@Const @StdWString CharPointer text,
+                                    @Cast("WinToastTemplate::TextField") int FirstLine);
 
     public native void addAction(@Const @StdWString CharPointer label);
 

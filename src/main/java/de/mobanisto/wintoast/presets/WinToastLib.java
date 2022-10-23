@@ -59,7 +59,8 @@ public class WinToastLib implements InfoMapper {
         infoMap.put(new Info("f_WindowsGetStringRawBuffer").pointerTypes("f_WindowsGetStringRawBuffer").skip());
         infoMap.put(new Info("f_WindowsDeleteString").pointerTypes("f_WindowsDeleteString").skip());
         infoMap.put(new Info("f_WindowsCreateStringReference").pointerTypes("f_WindowsCreateStringReference").skip());
-        infoMap.put(new Info("f_SetCurrentProcessExplicitAppUserModelID").pointerTypes("f_SetCurrentProcessExplicitAppUserModelID").skip());
+        infoMap.put(new Info("f_SetCurrentProcessExplicitAppUserModelID").pointerTypes(
+                "f_SetCurrentProcessExplicitAppUserModelID").skip());
         infoMap.put(new Info("f_RoGetActivationFactory").pointerTypes("f_RoGetActivationFactory").skip());
         infoMap.put(new Info("f_PropVariantToString").pointerTypes("f_PropVariantToString").skip());
 
