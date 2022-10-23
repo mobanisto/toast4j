@@ -34,6 +34,8 @@ public class WinToast extends Pointer {
 
     public native void setAppUserModelId(@Const @StdWString CharPointer appUserModelId);
 
+    public native void setShortcutPolicy(@Cast("WinToastLib::WinToast::ShortcutPolicy") int code);
+
     public native boolean initialize();
 
     public native void clear();
@@ -49,4 +51,12 @@ public class WinToast extends Pointer {
 
     public native void allocate();
 
+    /**
+     * enum WinToastLib::WinToast::ShortcutPolicy
+     */
+    public static class ShortcutPolicy {
+        public static final int ShortcutPolicyIgnore = 0,
+                ShortcutPolicyRequireNoCreate = 1,
+                ShortcutPolicyRequireCreate = 2;
+    }
 }
