@@ -212,9 +212,16 @@ namespace Util {
         return (written > 0) ? S_OK : E_FAIL;
     }
 
-
     inline HRESULT defaultShellLinksDirectory(_In_ WCHAR* path, _In_ DWORD nSize = MAX_PATH) {
-        DWORD written = GetEnvironmentVariableW(L"APPDATA", path, nSize);
+        // TODO: make it configurable to use either of both environment variables.
+        // We use this as the base path to resolve DEFAULT_SHELL_LINKS_PATH, i.e. Microsoft\Windows\Start Menu\Programs".
+        // APPDATA is C:\Users\pc\AppData\Roaming\Microsoft\Windows\Start Menu\Programs
+        // and
+        // ProgramData is C:\ProgramData\Microsoft\Windows\Start Menu\Programs
+        // Depending on where your link is installed only one or the other will work to resolve it.
+
+        // DWORD written = GetEnvironmentVariableW(L"APPDATA", path, nSize);
+        DWORD written = GetEnvironmentVariableW(L"ProgramData", path, nSize);
         HRESULT hr = written > 0 ? S_OK : E_INVALIDARG;
         if (SUCCEEDED(hr)) {
             errno_t result = wcscat_s(path, nSize, DEFAULT_SHELL_LINKS_PATH);
