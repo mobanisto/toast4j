@@ -464,6 +464,10 @@ enum WinToast::ShortcutResult WinToast::createShortcut() {
         return SHORTCUT_INCOMPATIBLE_OS;
     }
 
+    if (!_hasCoInitialized) {
+        return SHORTCUT_COM_INIT_FAILURE;
+    }
+
     bool wasChanged;
     HRESULT hr = validateShellLinkHelper(wasChanged);
     if (SUCCEEDED(hr))
@@ -471,6 +475,26 @@ enum WinToast::ShortcutResult WinToast::createShortcut() {
 
     hr = createShellLinkHelper();
     return SUCCEEDED(hr) ? SHORTCUT_WAS_CREATED : SHORTCUT_CREATE_FAILED;
+}
+
+// It is important to call this before using any of the methods that use CoCreateInstance()
+// as it will fail otherwise. This concerns all the methods that deal with the shell links.
+bool WinToast::initializeCo() {
+    if (_hasCoInitialized) {
+        return true;
+    }
+    HRESULT initHr = CoInitializeEx(nullptr, COINIT::COINIT_MULTITHREADED);
+    if (initHr != RPC_E_CHANGED_MODE) {
+        if (FAILED(initHr) && initHr != S_FALSE) {
+            DEBUG_MSG(L"Error on COM library initialization!");
+            return false;
+        }
+        else {
+            _hasCoInitialized = true;
+            return true;
+        }
+    }
+    return false;
 }
 
 bool WinToast::initialize(_Out_opt_ WinToastError* error) {
@@ -489,32 +513,8 @@ bool WinToast::initialize(_Out_opt_ WinToastError* error) {
         return false;
     }
 
-    // This is important to do even if shortcut policy is ignore, otherwise calls to
-    // CoCreateInstance() will fail!
+    initializeCo();
     if (!_hasCoInitialized) {
-        HRESULT initHr = CoInitializeEx(nullptr, COINIT::COINIT_MULTITHREADED);
-        if (initHr != RPC_E_CHANGED_MODE) {
-            if (FAILED(initHr) && initHr != S_FALSE) {
-                DEBUG_MSG(L"Error on COM library initialization!");
-                return SHORTCUT_COM_INIT_FAILURE;
-            }
-            else {
-                _hasCoInitialized = true;
-            }
-        }
-    }
-
-    if (_shortcutPolicy != SHORTCUT_POLICY_IGNORE) {
-        if (createShortcut() < 0) {
-            setError(error, WinToastError::ShellLinkNotCreated);
-            DEBUG_MSG(L"Error while attaching the AUMI to the current proccess =(");
-            return false;
-        }
-    }
-
-    if (FAILED(DllImporter::SetCurrentProcessExplicitAppUserModelID(_aumi.c_str()))) {
-        setError(error, WinToastError::InvalidAppUserModelID);
-        DEBUG_MSG(L"Error while attaching the AUMI to the current proccess =(");
         return false;
     }
 
@@ -524,6 +524,26 @@ bool WinToast::initialize(_Out_opt_ WinToastError* error) {
 
 bool WinToast::isInitialized() const {
     return _isInitialized;
+}
+
+bool WinToast::initializeShortcut(_Out_opt_ WinToastError* error) {
+    if (_shortcutPolicy != SHORTCUT_POLICY_IGNORE) {
+        if (createShortcut() < 0) {
+            setError(error, WinToastError::ShellLinkNotCreated);
+            DEBUG_MSG(L"Error while attaching the AUMI to the current proccess =(");
+            return false;
+        }
+    }
+    return true;
+}
+
+bool WinToast::setProcessAumi(_Out_opt_ WinToastError* error) {
+    if (FAILED(DllImporter::SetCurrentProcessExplicitAppUserModelID(_aumi.c_str()))) {
+        setError(error, WinToastError::InvalidAppUserModelID);
+        DEBUG_MSG(L"Error while attaching the AUMI to the current proccess =(");
+        return false;
+    }
+    return true;
 }
 
 const std::wstring& WinToast::appName() const {
@@ -540,6 +560,7 @@ HRESULT	WinToast::validateShellLinkHelper(_Out_ bool& wasChanged) {
     Util::defaultShellLinkPath(_appName, path);
     // Check if the file exist
     DWORD attr = GetFileAttributesW(path);
+    DEBUG_MSG("Shell link path: " << path);
     if (attr >= 0xFFFFFFF) {
         DEBUG_MSG("Error, shell link not found. Try to create a new one in: " << path);
         return E_FAIL;
@@ -547,8 +568,8 @@ HRESULT	WinToast::validateShellLinkHelper(_Out_ bool& wasChanged) {
 
     // Let's load the file as shell link to validate.
     // - Create a shell link
-    // - Create a persistant file
-    // - Load the path as data for the persistant file
+    // - Create a persistent file
+    // - Load the path as data for the persistent file
     // - Read the property AUMI and validate with the current
     // - Review if AUMI is equal.
     ComPtr<IShellLink> shellLink;
@@ -597,7 +618,56 @@ HRESULT	WinToast::validateShellLinkHelper(_Out_ bool& wasChanged) {
     return hr;
 }
 
+bool WinToast::doesShellLinkExist() {
+    WCHAR path[MAX_PATH] = { L'\0' };
+    Util::defaultShellLinkPath(_appName, path);
+    // Check if the file exist
+    DWORD attr = GetFileAttributesW(path);
+    return attr < 0xFFFFFFF;
+}
 
+bool WinToast::getAumiFromShellLink(_Out_ std::wstring& aumi) {
+    WCHAR path[MAX_PATH] = { L'\0' };
+    Util::defaultShellLinkPath(_appName, path);
+    // Check if the file exist
+    DWORD attr = GetFileAttributesW(path);
+    if (attr >= 0xFFFFFFF) {
+        DEBUG_MSG("Error, shell link not found at: " << path);
+        return false;
+    }
+
+    // Let's load the file as shell link to extract the current AUMI.
+    // - Create a shell link
+    // - Create a persistent file
+    // - Load the path as data for the persistent file
+    // - Read the property AUMI
+    ComPtr<IShellLink> shellLink;
+    HRESULT hr = CoCreateInstance(CLSID_ShellLink, nullptr, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&shellLink));
+    if (SUCCEEDED(hr)) {
+        ComPtr<IPersistFile> persistFile;
+        hr = shellLink.As(&persistFile);
+        if (SUCCEEDED(hr)) {
+            hr = persistFile->Load(path, STGM_READWRITE);
+            if (SUCCEEDED(hr)) {
+                ComPtr<IPropertyStore> propertyStore;
+                hr = shellLink.As(&propertyStore);
+                if (SUCCEEDED(hr)) {
+                    PROPVARIANT appIdPropVar;
+                    hr = propertyStore->GetValue(PKEY_AppUserModel_ID, &appIdPropVar);
+                    if (SUCCEEDED(hr)) {
+                        VARTYPE x = appIdPropVar.vt;
+                        if (x == VT_LPWSTR) {
+                            std::wstring str = appIdPropVar.pwszVal;
+                            aumi = appIdPropVar.pwszVal;
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return false;
+}
 
 HRESULT	WinToast::createShellLinkHelper() {
     if (_shortcutPolicy != SHORTCUT_POLICY_REQUIRE_CREATE) {

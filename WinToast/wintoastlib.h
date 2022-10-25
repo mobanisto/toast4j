@@ -199,10 +199,14 @@ namespace WinToastLib {
         static const std::wstring& strerror(_In_ WinToastError error);
         virtual bool initialize(_Out_opt_ WinToastError* error = nullptr);
         virtual bool isInitialized() const;
+        virtual bool initializeShortcut(_Out_opt_ WinToastError* error = nullptr);
+        virtual bool setProcessAumi(_Out_opt_ WinToastError* error = nullptr);
         virtual bool hideToast(_In_ INT64 id);
         virtual INT64 showToast(_In_ const WinToastTemplate& toast, _In_ IWinToastHandler* handler, _Out_opt_ WinToastError* error = nullptr);
         virtual void clear();
         virtual enum ShortcutResult createShortcut();
+        virtual bool doesShellLinkExist();
+        virtual bool getAumiFromShellLink(_Out_ std::wstring& aumi);
 
         const std::wstring& appName() const;
         const std::wstring& appUserModelId() const;
@@ -218,6 +222,7 @@ namespace WinToastLib {
         std::wstring                                    _aumi{};
         std::map<INT64, ComPtr<IToastNotification>>     _buffer{};
 
+        bool initializeCo();
         HRESULT validateShellLinkHelper(_Out_ bool& wasChanged);
         HRESULT createShellLinkHelper();
         HRESULT setImageFieldHelper(_In_ IXmlDocument *xml, _In_ const std::wstring& path);

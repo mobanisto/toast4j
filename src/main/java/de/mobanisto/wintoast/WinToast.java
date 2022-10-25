@@ -38,7 +38,15 @@ public class WinToast extends Pointer {
 
     public native boolean initialize();
 
+    public native boolean initializeShortcut();
+
+    public native boolean setProcessAumi();
+
     public native void clear();
+
+    public native boolean doesShellLinkExist();
+
+    public native boolean getAumiFromShellLink(@StdWString CharPointer output);
 
     public native @StdWString
     @Const CharPointer strerror(@Cast("WinToastLib::WinToast::WinToastError") int code);
