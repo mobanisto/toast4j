@@ -4,6 +4,7 @@ import de.mobanisto.wintoast.Aumi;
 import de.mobanisto.wintoast.IWinToastHandler;
 import de.mobanisto.wintoast.WinToast;
 import de.mobanisto.wintoast.WinToastTemplate;
+import de.mobanisto.wintoast.WinToastTemplate.WinToastTemplateType;
 import org.bytedeco.javacpp.CharPointer;
 import org.bytedeco.javacpp.IntPointer;
 
@@ -63,34 +64,9 @@ public class WinToastHelper {
         }
     };
 
-    public ToastHandle showTextToast(String line1, String line2) {
-        WinToastTemplate winToastTemplate =
-                new WinToastTemplate(WinToastTemplate.WinToastTemplateType.ToastText02);
-        System.out.println("template address: " + winToastTemplate.address());
-        winToastTemplate.setTextField(new CharPointer(line1), WinToastTemplate.TextField.FirstLine);
-        winToastTemplate.setTextField(new CharPointer(line2), WinToastTemplate.TextField.SecondLine);
-        winToastTemplate.setAudioOption(WinToastTemplate.AudioOption.Silent);
-        winToastTemplate.setExpiration(10000);
-
+    public ToastHandle showToast(WinToastTemplate template) {
         IntPointer errorCode = new IntPointer(0);
-        long uid = winToast.showToast(winToastTemplate, iWinToastHandler, errorCode);
-        System.out.println("toast uid: " + uid);
-        System.out.println("error code: " + winToast.strerror(errorCode.get()).getString());
-        return new ToastHandle(this, uid);
-    }
-
-    public ToastHandle showImageToast(String line1, String line2, String image) {
-        WinToastTemplate winToastTemplate =
-                new WinToastTemplate(WinToastTemplate.WinToastTemplateType.ToastImageAndText02);
-        System.out.println("template address: " + winToastTemplate.address());
-        winToastTemplate.setTextField(new CharPointer(line1), WinToastTemplate.TextField.FirstLine);
-        winToastTemplate.setTextField(new CharPointer(line2), WinToastTemplate.TextField.SecondLine);
-        winToastTemplate.setImagePath(new CharPointer(image));
-        winToastTemplate.setAudioOption(WinToastTemplate.AudioOption.Silent);
-        winToastTemplate.setExpiration(10000);
-
-        IntPointer errorCode = new IntPointer(0);
-        long uid = winToast.showToast(winToastTemplate, iWinToastHandler, errorCode);
+        long uid = winToast.showToast(template, iWinToastHandler, errorCode);
         System.out.println("toast uid: " + uid);
         System.out.println("error code: " + winToast.strerror(errorCode.get()).getString());
         return new ToastHandle(this, uid);

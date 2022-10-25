@@ -1,10 +1,14 @@
 package de.mobanisto.wintoast;
 
+import de.mobanisto.wintoast.helper.ToastBuilder;
 import de.mobanisto.wintoast.helper.ToastHandle;
 import de.mobanisto.wintoast.helper.WinToastHelper;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+
+import static de.mobanisto.wintoast.WinToastTemplate.WinToastTemplateType.ToastImageAndText02;
+import static de.mobanisto.wintoast.WinToastTemplate.WinToastTemplateType.ToastText02;
 
 public class Test {
 
@@ -45,12 +49,21 @@ public class Test {
 
         Path cwd = Paths.get(System.getProperty("user.dir"));
         String image = cwd.resolve("example/terminal.png").toAbsolutePath().toString();
-        ToastHandle toast1 = toastHelper.showTextToast("Foo", "Something important");
-        Thread.sleep(2000);
+
+        ToastHandle toast1 = toastHelper.showToast(
+                new ToastBuilder(ToastText02).setLine1("You've got 7 new messages").build());
+        Thread.sleep(3000);
         toast1.hide();
-        ToastHandle toast2 = toastHelper.showImageToast("Bar", "Goodbye", image);
-        Thread.sleep(5000);
+
+        ToastHandle toast2 = toastHelper.showToast(
+                new ToastBuilder(ToastText02).setLine1("Foo").setLine2("Something important").setLine3("asdfasd").build());
+        Thread.sleep(3000);
         toast2.hide();
+
+        ToastHandle toast3 = toastHelper.showToast(
+                new ToastBuilder(ToastImageAndText02).setLine1("Bar").setLine2("Goodbye").setImage(image).build());
+        Thread.sleep(5000);
+        toast3.hide();
     }
 
 }

@@ -77,14 +77,31 @@ public class WinToastTemplate extends Pointer {
     /**
      * enum WinToastLib::WinToastTemplate::WinToastTemplateType
      */
-    public static class WinToastTemplateType {
-        public static final int ToastImageAndText01 = 0,
-                ToastImageAndText02 = 1,
-                ToastImageAndText03 = 2,
-                ToastImageAndText04 = 3;
-        public static final int ToastText01 = 4,
-                ToastText02 = 5,
-                ToastText03 = 6,
-                ToastText04 = 7;
+    public enum WinToastTemplateType {
+
+        ToastImageAndText01(0, 1),
+        ToastImageAndText02(1, 2),
+        ToastImageAndText03(2, 2),
+        ToastImageAndText04(3, 3),
+        ToastText01(4, 1),
+        ToastText02(5, 2),
+        ToastText03(6, 2),
+        ToastText04(7, 3);
+
+        private int id;
+        private int numTextFields;
+
+        WinToastTemplateType(int id, int numTextFields) {
+            this.id = id;
+            this.numTextFields = numTextFields;
+        }
+
+        public int getId() {
+            return id;
+        }
+
+        public int getNumTextFields() {
+            return numTextFields;
+        }
     }
 }
