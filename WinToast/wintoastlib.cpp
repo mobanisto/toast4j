@@ -464,19 +464,6 @@ enum WinToast::ShortcutResult WinToast::createShortcut() {
         return SHORTCUT_INCOMPATIBLE_OS;
     }
 
-    if (!_hasCoInitialized) {
-        HRESULT initHr = CoInitializeEx(nullptr, COINIT::COINIT_MULTITHREADED);
-        if (initHr != RPC_E_CHANGED_MODE) {
-            if (FAILED(initHr) && initHr != S_FALSE) {
-                DEBUG_MSG(L"Error on COM library initialization!");
-                return SHORTCUT_COM_INIT_FAILURE;
-            }
-            else {
-                _hasCoInitialized = true;
-            }
-        }
-    }
-
     bool wasChanged;
     HRESULT hr = validateShellLinkHelper(wasChanged);
     if (SUCCEEDED(hr))
@@ -496,11 +483,25 @@ bool WinToast::initialize(_Out_opt_ WinToastError* error) {
         return false;
     }
 
-
     if (_aumi.empty() || _appName.empty()) {
         setError(error, WinToastError::InvalidParameters);
         DEBUG_MSG(L"Error while initializing, did you set up a valid AUMI and App name?");
         return false;
+    }
+
+    // This is important to do even if shortcut policy is ignore, otherwise calls to
+    // CoCreateInstance() will fail!
+    if (!_hasCoInitialized) {
+        HRESULT initHr = CoInitializeEx(nullptr, COINIT::COINIT_MULTITHREADED);
+        if (initHr != RPC_E_CHANGED_MODE) {
+            if (FAILED(initHr) && initHr != S_FALSE) {
+                DEBUG_MSG(L"Error on COM library initialization!");
+                return SHORTCUT_COM_INIT_FAILURE;
+            }
+            else {
+                _hasCoInitialized = true;
+            }
+        }
     }
 
     if (_shortcutPolicy != SHORTCUT_POLICY_IGNORE) {
