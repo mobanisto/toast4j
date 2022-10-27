@@ -11,6 +11,11 @@ ext {
     msvcc = "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.33.31629"
 }
 
+if (project.hasProperty("topobyte")) {
+    apply from: 'file:///' + System.getProperty("user.home") \
+        + '/.gradle/topobyte.gradle'
+}
+
 repositories {
     mavenCentral()
 }
