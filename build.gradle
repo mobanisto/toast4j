@@ -16,7 +16,7 @@ repositories {
 }
 
 dependencies {
-    implementation 'org.bytedeco:javacpp:1.5.7'
+    api 'org.bytedeco:javacpp:1.5.7'
 }
 
 java {
