@@ -15,6 +15,9 @@ repositories {
     mavenCentral()
 }
 
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
 dependencies {
     api 'org.bytedeco:javacpp:1.5.7'
 }
