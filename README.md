@@ -1,14 +1,16 @@
-# jWinToast
-jWinToast is a Java package for creating native Windows notifications. It is a Java extension built around C++.
-The C++ part comes from [WinToastWrapper](https://github.com/ootime/WinToastWrapper) library.
+# Toast4j
+Toast4j is a Java package for creating native Windows notifications. It is a Java extension built
+around C++ and is based on the [WinToast](https://github.com/mohabouje/WinToast) library.
 
 ## Prerequisites
 
-Install Visual Studio and configure current environment variables.
+Install Visual Studio and configure hardcoded paths in `build.gradle`.
 
 ## Documentation
 
-You may find some limited documentation on [WinToast Page](https://github.com/mohabouje/WinToast).
+You may find some documentation on the [WinToast](https://github.com/mohabouje/WinToast) repo
+and also on the [introductory article](https://learn.microsoft.com/en-us/windows/apps/design/shell/tiles-and-notifications/toast-notifications-overview)
+on Microsoft Learn about toast notifications.
 
 ## History
 
@@ -20,6 +22,15 @@ It seems to originally have taken those files from that repository at revision
 c8f50eb220cab7aec5e4e426ce52e75de7d20964 (Mar 24, 2019) on top of which some modifications
 have been added.
 
+WinToastWrapper and jWinToast added the C++ bindings using JavaCPP and also tried to support
+some of the more modern notification features with custom templates, i.e. buttons, progress
+bars etc. These extension were not fully baked yet, so we chose to remove them and only keep
+the JavaCPP wrappers.
+
+While working with the original WinToast source code, some rough edges have been detected that
+have been smoothened within this repository. There's still some cleaning up and documentation
+left to be done though.
+
 ## Publishing
 
 To build and publish, you need to have the MSVC compiler on your path. On cygwin, you can
@@ -30,3 +41,7 @@ do something like this:
 Afterwards, in order to publish to Maven local:
 
     ./gradlew publishToMavenLocal
+
+Publishing to our Maven repository works like this:
+
+    ./gradlew -Ptopboyte publish
