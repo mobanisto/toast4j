@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+  <name>toast4j</name>
+  <description>Windows toast notifications for the JVM.</description>
+  <url>https://github.com/mobanisto/toast4j</url>
+  <licenseName>MIT License</licenseName>
+  <licenseUrl>https://www.opensource.org/licenses/MIT</licenseUrl>
+  <licenseDistribution>repo</licenseDistribution>
+</project>

@@ -31,6 +31,8 @@ java {
     withSourcesJar()
 }
 
+def pomInfo = new XmlSlurper().parse(file('info.pom'));
+
 // Define this manually, otherwise the javacpp build plugin will ship a jar file that includes .obj, .exp and .lib
 // files and duplicates the dll file at de/mobanisto/wintoast/windows-x86_64/
 publishing {
@@ -39,8 +41,19 @@ publishing {
             groupId = 'de.mobanisto'
             artifactId = 'toast4j'
             version = '0.1.0'
-
             from components.java
+            pom {
+                name = "$pomInfo.name"
+                description = "$pomInfo.description"
+                url = "$pomInfo.url"
+                licenses {
+                    license {
+                        name = "$pomInfo.licenseName"
+                        url = "$pomInfo.licenseUrl"
+                        distribution = "$pomInfo.licenseDistribution"
+                    }
+                }
+            }
         }
     }
 }
