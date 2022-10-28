@@ -60,6 +60,7 @@ int wmain(int argc, LPWSTR* argv)
     WinToastTemplate::AudioOption audioOption = WinToastTemplate::AudioOption::Default;
 
     // Try any of these combinations and send notifications like OneDrive, Chrome or Pidgin :)
+    // Try `Get-StartApps` on the PowerShell to find more.
     //appName = L"OneDrive";
     //appUserModelID = L"Microsoft.SkyDrive.Desktop",
     //appName = L"Google Chrome";
