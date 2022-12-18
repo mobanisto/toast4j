@@ -31,6 +31,16 @@ While working with the original WinToast source code, some rough edges have been
 have been smoothened within this repository. There's still some cleaning up and documentation
 left to be done though.
 
+## Development
+
+In order to build successfully in IntelliJ you need to have the MSVC compiler on you path.
+Edit the run configuration of a class you want to run
+and set the PATH in the "Environment variables" input field:
+
+```
+PATH=C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.33.31629\bin\Hostx64\x64
+```
+
 ## Publishing
 
 To build and publish, you need to have the MSVC compiler on your path. On cygwin, you can
