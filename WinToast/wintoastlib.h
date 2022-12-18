@@ -199,32 +199,26 @@ namespace WinToastLib {
         static const std::wstring& strerror(_In_ WinToastError error);
         virtual bool initialize(_Out_opt_ WinToastError* error = nullptr);
         virtual bool isInitialized() const;
-        virtual bool initializeShortcut(_Out_opt_ WinToastError* error = nullptr);
-        virtual bool setProcessAumi(_Out_opt_ WinToastError* error = nullptr);
-        virtual bool hideToast(_In_ INT64 id);
-        virtual INT64 showToast(_In_ const WinToastTemplate& toast, _In_ IWinToastHandler* handler, _Out_opt_ WinToastError* error = nullptr);
-        virtual void clear();
-        virtual enum ShortcutResult createShortcut();
-        virtual bool doesShellLinkExist();
-        virtual bool getAumiFromShellLink(_Out_ std::wstring& aumi);
+        virtual bool initializeShortcut(_In_ const std::wstring& appname, _In_ const std::wstring& aumi, _Out_opt_ WinToastError* error = nullptr);
+        virtual bool setProcessAumi(_In_ const std::wstring& aumi, _Out_opt_ WinToastError* error = nullptr);
+        virtual bool hideToast(_In_ const std::wstring& aumi, _In_ INT64 id);
+        virtual INT64 showToast(_In_ const std::wstring& aumi, _In_ const WinToastTemplate& toast, _In_ IWinToastHandler* handler, _Out_opt_ WinToastError* error = nullptr);
+        virtual void clear(_In_ const std::wstring& aumi);
+        virtual enum ShortcutResult createShortcut(_In_ const std::wstring& appname, _In_ const std::wstring& aumi);
+        virtual bool doesShellLinkExist(_In_ const std::wstring& appname);
+        virtual bool getAumiFromShellLink(_In_ const std::wstring& appname, _Out_ std::wstring& aumi);
 
-        const std::wstring& appName() const;
-        const std::wstring& appUserModelId() const;
-        void setAppUserModelId(_In_ const std::wstring& aumi);
-        void setAppName(_In_ const std::wstring& appName);
         void setShortcutPolicy(_In_ ShortcutPolicy policy);
 
     protected:
         bool                                            _isInitialized{false};
         bool                                            _hasCoInitialized{false};
         ShortcutPolicy                                  _shortcutPolicy{SHORTCUT_POLICY_REQUIRE_CREATE};
-        std::wstring                                    _appName{};
-        std::wstring                                    _aumi{};
         std::map<INT64, ComPtr<IToastNotification>>     _buffer{};
 
         bool initializeCo();
-        HRESULT validateShellLinkHelper(_Out_ bool& wasChanged);
-        HRESULT createShellLinkHelper();
+        HRESULT validateShellLinkHelper(_In_ const std::wstring& appname, _In_ const std::wstring& aumi, _Out_ bool& wasChanged);
+        HRESULT createShellLinkHelper(_In_ const std::wstring& appname, _In_ const std::wstring& aumi);
         HRESULT setImageFieldHelper(_In_ IXmlDocument *xml, _In_ const std::wstring& path);
         HRESULT setAudioFieldHelper(_In_ IXmlDocument *xml, _In_ const std::wstring& path, _In_opt_ WinToastTemplate::AudioOption option = WinToastTemplate::AudioOption::Default);
         HRESULT setTextFieldHelper(_In_ IXmlDocument *xml, _In_ const std::wstring& text, _In_ UINT32 pos);
@@ -232,7 +226,7 @@ namespace WinToastLib {
         HRESULT addActionHelper(_In_ IXmlDocument *xml, _In_ const std::wstring& action, _In_ const std::wstring& arguments);
         HRESULT addDurationHelper(_In_ IXmlDocument *xml, _In_ const std::wstring& duration);
         HRESULT addScenarioHelper(_In_ IXmlDocument *xml, _In_ const std::wstring& scenario);
-        ComPtr<IToastNotifier> notifier(_In_ bool* succeded) const;
+        ComPtr<IToastNotifier> notifier(_In_ const std::wstring& aumi, _In_ bool* succeeded) const;
         void setError(_Out_opt_ WinToastError* error, _In_ WinToastError value);
     };
 }

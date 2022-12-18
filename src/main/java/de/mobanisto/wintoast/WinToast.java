@@ -21,32 +21,30 @@ public class WinToast extends Pointer {
     public static native WinToast instance();
 
     public native @Cast("uint32_t") long showToast(
+            @Const @StdWString CharPointer aumi,
             @Const @ByRef WinToastTemplate winToastTemplate,
             IWinToastHandler iWinToastHandler,
             @Cast("WinToastLib::WinToast::WinToastError *") IntPointer erro);
-
-    public native void setAppName(@Const @StdWString CharPointer name);
 
     public native @StdWString CharPointer configureAUMI(@Const @StdWString CharPointer companyName,
                                                         @Const @StdWString CharPointer productName,
                                                         @Const @StdWString CharPointer subProduct,
                                                         @Const @StdWString CharPointer versionInformation);
 
-    public native void setAppUserModelId(@Const @StdWString CharPointer appUserModelId);
-
     public native void setShortcutPolicy(@Cast("WinToastLib::WinToast::ShortcutPolicy") int code);
 
     public native boolean initialize();
 
-    public native boolean initializeShortcut();
+    public native boolean initializeShortcut(@Const @StdWString CharPointer appName,
+                                             @Const @StdWString CharPointer aumi);
 
-    public native boolean setProcessAumi();
+    public native boolean setProcessAumi(@Const @StdWString CharPointer aumi);
 
-    public native void clear();
+    public native void clear(@Const @StdWString CharPointer aumi);
 
-    public native boolean doesShellLinkExist();
+    public native boolean doesShellLinkExist(@Const @StdWString CharPointer appName);
 
-    public native boolean getAumiFromShellLink(@StdWString CharPointer output);
+    public native boolean getAumiFromShellLink(@Const @StdWString CharPointer appName, @StdWString CharPointer aumi);
 
     public native @StdWString
     @Const CharPointer strerror(@Cast("WinToastLib::WinToast::WinToastError") int code);
@@ -55,7 +53,7 @@ public class WinToast extends Pointer {
 
     public native boolean isSupportingModernFeatures();
 
-    public native boolean hideToast(long id);
+    public native boolean hideToast(@Const @StdWString CharPointer appName, long id);
 
     public native void allocate();
 

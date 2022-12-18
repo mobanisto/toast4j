@@ -10,7 +10,7 @@ import java.nio.file.Paths;
 import static de.mobanisto.wintoast.WinToastTemplate.WinToastTemplateType.ToastImageAndText02;
 import static de.mobanisto.wintoast.WinToastTemplate.WinToastTemplateType.ToastText02;
 
-public class Test {
+public class TestInitializeShortcut {
 
     public static void main(String[] args) throws InterruptedException {
         // It is required to have a shortcut installed that matches the app name.
@@ -24,7 +24,7 @@ public class Test {
         // the path above such as 'Company/Product.lnk'. Hence, the appName needs
         // to be 'Company\\Product'.
         //
-        // WinToast will set the AUMI for an existing shortcut so that an app that
+        // WinToast can set the AUMI for an existing shortcut so that an app that
         // creates toasts with that AUMI will be decorated with an icon that is taken
         // from the shortcut with the same associated AUMI. When there are multiple
         // shortcuts that have a matching AUMI, the first one found will be used, which
@@ -33,22 +33,21 @@ public class Test {
         // WinToast can also attempt to create a shortcut for you, however it won't
         // currently create subdirectories, i.e. you need to make sure that
         // the subdirectory 'Company' exists in '$ProgramData\Microsoft\Windows\Start Menu\Programs'.
-        WinToastHelper toastHelper = new WinToastHelper(
-                "Test Notifications",
-                "Mobanisto\\Test Notifications"
-        );
+        String aumi = "Test Notifications Foo";
+        String appName = "Mobanisto\\Test Notifications Foo";
+        WinToastHelper toastHelper = WinToastHelper.forAumi(aumi);
         boolean initialized = toastHelper.initialize();
         if (!initialized) {
             return;
         }
-        boolean doesShellLinkExist = toastHelper.doesShellLinkExist();
+        boolean doesShellLinkExist = toastHelper.doesShellLinkExist(appName);
         System.out.println("Found shell link? " + doesShellLinkExist);
-        String aumi = toastHelper.getAumiFromShellLink();
-        System.out.println("Found aumi: " + aumi);
-        toastHelper.initializeShortcut();
+        String aumiFound = toastHelper.getAumiFromShellLink(appName);
+        System.out.println("Found aumi: " + aumiFound);
+        toastHelper.initializeShortcut(appName);
 
-        Path cwd = Paths.get(System.getProperty("user.dir"));
-        String image = cwd.resolve("example/terminal.png").toAbsolutePath().toString();
+        // Wait a moment, otherwise the first notification will not have the icon instantly.
+        Thread.sleep(3000);
 
         ToastHandle toast1 = toastHelper.showToast(
                 new ToastBuilder(ToastText02).setLine1("You've got 7 new messages").build());
@@ -59,11 +58,6 @@ public class Test {
                 new ToastBuilder(ToastText02).setLine1("Foo").setLine2("Something important").setLine3("asdfasd").build());
         Thread.sleep(3000);
         toast2.hide();
-
-        ToastHandle toast3 = toastHelper.showToast(
-                new ToastBuilder(ToastImageAndText02).setLine1("Bar").setLine2("Goodbye").setImage(image).build());
-        Thread.sleep(5000);
-        toast3.hide();
     }
 
 }

@@ -12,7 +12,7 @@ import org.bytedeco.javacpp.tools.InfoMapper;
         global = "de.mobanisto.wintoast.global.WinToastLib",
         value = {
                 @Platform(
-                        define = "NDEBUG",
+                        define = "NDEBUG", // Disable debug printing of the native library code
                         value = {
                                 "windows-x86",
                                 "windows-x86_64"

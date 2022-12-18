@@ -242,7 +242,6 @@ namespace Util {
         return hr;
     }
 
-
     inline PCWSTR AsString(ComPtr<IXmlDocument> &xmlDocument) {
         HSTRING xml;
         ComPtr<IXmlNodeSerializer> ser;
@@ -388,16 +387,6 @@ WinToast::~WinToast() {
     }
 }
 
-void WinToast::setAppName(_In_ const std::wstring& appName) {
-    _appName = appName;
-}
-
-
-void WinToast::setAppUserModelId(_In_ const std::wstring& aumi) {
-    _aumi = aumi;
-    DEBUG_MSG(L"Default App User Model Id: " << _aumi.c_str());
-}
-
 void WinToast::setShortcutPolicy(_In_ ShortcutPolicy shortcutPolicy) {
     _shortcutPolicy = shortcutPolicy;
 }
@@ -453,8 +442,8 @@ const std::wstring& WinToast::strerror(WinToastError error) {
     return iter->second;
 }
 
-enum WinToast::ShortcutResult WinToast::createShortcut() {
-    if (_aumi.empty() || _appName.empty()) {
+enum WinToast::ShortcutResult WinToast::createShortcut(_In_ const std::wstring& appname, _In_ const std::wstring& aumi) {
+    if (aumi.empty() || appname.empty()) {
         DEBUG_MSG(L"Error: App User Model Id or Appname is empty!");
         return SHORTCUT_MISSING_PARAMETERS;
     }
@@ -469,11 +458,11 @@ enum WinToast::ShortcutResult WinToast::createShortcut() {
     }
 
     bool wasChanged;
-    HRESULT hr = validateShellLinkHelper(wasChanged);
+    HRESULT hr = validateShellLinkHelper(appname, aumi, wasChanged);
     if (SUCCEEDED(hr))
         return wasChanged ? SHORTCUT_WAS_CHANGED : SHORTCUT_UNCHANGED;
 
-    hr = createShellLinkHelper();
+    hr = createShellLinkHelper(appname, aumi);
     return SUCCEEDED(hr) ? SHORTCUT_WAS_CREATED : SHORTCUT_CREATE_FAILED;
 }
 
@@ -507,12 +496,6 @@ bool WinToast::initialize(_Out_opt_ WinToastError* error) {
         return false;
     }
 
-    if (_aumi.empty() || _appName.empty()) {
-        setError(error, WinToastError::InvalidParameters);
-        DEBUG_MSG(L"Error while initializing, did you set up a valid AUMI and App name?");
-        return false;
-    }
-
     initializeCo();
     if (!_hasCoInitialized) {
         return false;
@@ -526,9 +509,9 @@ bool WinToast::isInitialized() const {
     return _isInitialized;
 }
 
-bool WinToast::initializeShortcut(_Out_opt_ WinToastError* error) {
+bool WinToast::initializeShortcut(_In_ const std::wstring& appname, _In_ const std::wstring& aumi, _Out_opt_ WinToastError* error) {
     if (_shortcutPolicy != SHORTCUT_POLICY_IGNORE) {
-        if (createShortcut() < 0) {
+        if (createShortcut(appname, aumi) < 0) {
             setError(error, WinToastError::ShellLinkNotCreated);
             DEBUG_MSG(L"Error while attaching the AUMI to the current proccess =(");
             return false;
@@ -537,8 +520,8 @@ bool WinToast::initializeShortcut(_Out_opt_ WinToastError* error) {
     return true;
 }
 
-bool WinToast::setProcessAumi(_Out_opt_ WinToastError* error) {
-    if (FAILED(DllImporter::SetCurrentProcessExplicitAppUserModelID(_aumi.c_str()))) {
+bool WinToast::setProcessAumi(_In_ const std::wstring& aumi, _Out_opt_ WinToastError* error) {
+    if (FAILED(DllImporter::SetCurrentProcessExplicitAppUserModelID(aumi.c_str()))) {
         setError(error, WinToastError::InvalidAppUserModelID);
         DEBUG_MSG(L"Error while attaching the AUMI to the current proccess =(");
         return false;
@@ -546,18 +529,9 @@ bool WinToast::setProcessAumi(_Out_opt_ WinToastError* error) {
     return true;
 }
 
-const std::wstring& WinToast::appName() const {
-    return _appName;
-}
-
-const std::wstring& WinToast::appUserModelId() const {
-    return _aumi;
-}
-
-
-HRESULT	WinToast::validateShellLinkHelper(_Out_ bool& wasChanged) {
+HRESULT	WinToast::validateShellLinkHelper(_In_ const std::wstring& appname, _In_ const std::wstring& aumi, _Out_ bool& wasChanged) {
 	WCHAR	path[MAX_PATH] = { L'\0' };
-    Util::defaultShellLinkPath(_appName, path);
+    Util::defaultShellLinkPath(appname, path);
     // Check if the file exist
     DWORD attr = GetFileAttributesW(path);
     DEBUG_MSG("Shell link path: " << path);
@@ -589,12 +563,12 @@ HRESULT	WinToast::validateShellLinkHelper(_Out_ bool& wasChanged) {
                         WCHAR AUMI[MAX_PATH];
                         hr = DllImporter::PropVariantToString(appIdPropVar, AUMI, MAX_PATH);
                         wasChanged = false;
-                        if (FAILED(hr) || _aumi != AUMI) {
+                        if (FAILED(hr) || aumi != AUMI) {
                             if (_shortcutPolicy == SHORTCUT_POLICY_REQUIRE_CREATE) {
                                 // AUMI Changed for the same app, let's update the current value! =)
                                 wasChanged = true;
                                 PropVariantClear(&appIdPropVar);
-                                hr = InitPropVariantFromString(_aumi.c_str(), &appIdPropVar);
+                                hr = InitPropVariantFromString(aumi.c_str(), &appIdPropVar);
                                 if (SUCCEEDED(hr)) {
                                     hr = propertyStore->SetValue(PKEY_AppUserModel_ID, appIdPropVar);
                                     if (SUCCEEDED(hr)) {
@@ -618,17 +592,17 @@ HRESULT	WinToast::validateShellLinkHelper(_Out_ bool& wasChanged) {
     return hr;
 }
 
-bool WinToast::doesShellLinkExist() {
+bool WinToast::doesShellLinkExist(_In_ const std::wstring& appname) {
     WCHAR path[MAX_PATH] = { L'\0' };
-    Util::defaultShellLinkPath(_appName, path);
+    Util::defaultShellLinkPath(appname, path);
     // Check if the file exist
     DWORD attr = GetFileAttributesW(path);
     return attr < 0xFFFFFFF;
 }
 
-bool WinToast::getAumiFromShellLink(_Out_ std::wstring& aumi) {
+bool WinToast::getAumiFromShellLink(_In_ const std::wstring& appname, _Out_ std::wstring& aumi) {
     WCHAR path[MAX_PATH] = { L'\0' };
-    Util::defaultShellLinkPath(_appName, path);
+    Util::defaultShellLinkPath(appname, path);
     // Check if the file exist
     DWORD attr = GetFileAttributesW(path);
     if (attr >= 0xFFFFFFF) {
@@ -669,14 +643,14 @@ bool WinToast::getAumiFromShellLink(_Out_ std::wstring& aumi) {
     return false;
 }
 
-HRESULT	WinToast::createShellLinkHelper() {
+HRESULT	WinToast::createShellLinkHelper(_In_ const std::wstring& appname, _In_ const std::wstring& aumi) {
     if (_shortcutPolicy != SHORTCUT_POLICY_REQUIRE_CREATE) {
       return E_FAIL;
     }
 
 	WCHAR   exePath[MAX_PATH]{L'\0'};
 	WCHAR	slPath[MAX_PATH]{L'\0'};
-    Util::defaultShellLinkPath(_appName, slPath);
+    Util::defaultShellLinkPath(appname, slPath);
     Util::defaultExecutablePath(exePath);
     ComPtr<IShellLinkW> shellLink;
     HRESULT hr = CoCreateInstance(CLSID_ShellLink, nullptr, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&shellLink));
@@ -685,13 +659,14 @@ HRESULT	WinToast::createShellLinkHelper() {
         if (SUCCEEDED(hr)) {
             hr = shellLink->SetArguments(L"");
             if (SUCCEEDED(hr)) {
+                // TODO: path of exe as working dir is not valid
                 hr = shellLink->SetWorkingDirectory(exePath);
                 if (SUCCEEDED(hr)) {
                     ComPtr<IPropertyStore> propertyStore;
                     hr = shellLink.As(&propertyStore);
                     if (SUCCEEDED(hr)) {
                         PROPVARIANT appIdPropVar;
-                        hr = InitPropVariantFromString(_aumi.c_str(), &appIdPropVar);
+                        hr = InitPropVariantFromString(aumi.c_str(), &appIdPropVar);
                         if (SUCCEEDED(hr)) {
                             hr = propertyStore->SetValue(PKEY_AppUserModel_ID, appIdPropVar);
                             if (SUCCEEDED(hr)) {
@@ -714,7 +689,7 @@ HRESULT	WinToast::createShellLinkHelper() {
     return hr;
 }
 
-INT64 WinToast::showToast(_In_ const WinToastTemplate& toast, _In_  IWinToastHandler* handler, _Out_ WinToastError* error)  {
+INT64 WinToast::showToast(_In_ const std::wstring& aumi, _In_ const WinToastTemplate& toast, _In_  IWinToastHandler* handler, _Out_ WinToastError* error)  {
     setError(error, WinToastError::NoError);
     INT64 id = -1;
     if (!isInitialized()) {
@@ -732,7 +707,7 @@ INT64 WinToast::showToast(_In_ const WinToastTemplate& toast, _In_  IWinToastHan
     HRESULT hr = DllImporter::Wrap_GetActivationFactory(WinToastStringWrapper(RuntimeClass_Windows_UI_Notifications_ToastNotificationManager).Get(), &notificationManager);
     if (SUCCEEDED(hr)) {
         ComPtr<IToastNotifier> notifier;
-        hr = notificationManager->CreateToastNotifierWithId(WinToastStringWrapper(_aumi).Get(), &notifier);
+        hr = notificationManager->CreateToastNotifierWithId(WinToastStringWrapper(aumi).Get(), &notifier);
         if (SUCCEEDED(hr)) {
             ComPtr<IToastNotificationFactory> notificationFactory;
             hr = DllImporter::Wrap_GetActivationFactory(WinToastStringWrapper(RuntimeClass_Windows_UI_Notifications_ToastNotification).Get(), &notificationFactory);
@@ -821,18 +796,18 @@ INT64 WinToast::showToast(_In_ const WinToastTemplate& toast, _In_  IWinToastHan
     return FAILED(hr) ? -1 : id;
 }
 
-ComPtr<IToastNotifier> WinToast::notifier(_In_ bool* succeded) const  {
+ComPtr<IToastNotifier> WinToast::notifier(_In_ const std::wstring& aumi, _In_ bool* succeeded) const  {
 	ComPtr<IToastNotificationManagerStatics> notificationManager;
 	ComPtr<IToastNotifier> notifier;
 	HRESULT hr = DllImporter::Wrap_GetActivationFactory(WinToastStringWrapper(RuntimeClass_Windows_UI_Notifications_ToastNotificationManager).Get(), &notificationManager);
 	if (SUCCEEDED(hr)) {
-		hr = notificationManager->CreateToastNotifierWithId(WinToastStringWrapper(_aumi).Get(), &notifier);
+		hr = notificationManager->CreateToastNotifierWithId(WinToastStringWrapper(aumi).Get(), &notifier);
 	}
-	*succeded = SUCCEEDED(hr);
+	*succeeded = SUCCEEDED(hr);
 	return notifier;
 }
 
-bool WinToast::hideToast(_In_ INT64 id) {
+bool WinToast::hideToast(_In_ const std::wstring& aumi, _In_ INT64 id) {
     if (!isInitialized()) {
         DEBUG_MSG("Error when hiding the toast. WinToast is not initialized.");
         return false;
@@ -840,7 +815,7 @@ bool WinToast::hideToast(_In_ INT64 id) {
 
     if (_buffer.find(id) != _buffer.end()) {
         auto succeded = false;
-        auto notify = notifier(&succeded);
+        auto notify = notifier(aumi, &succeded);
 		if (succeded) {
             auto result = notify->Hide(_buffer[id].Get());
             _buffer.erase(id);
@@ -850,9 +825,9 @@ bool WinToast::hideToast(_In_ INT64 id) {
     return false;
 }
 
-void WinToast::clear() {
+void WinToast::clear(_In_ const std::wstring& aumi) {
     auto succeded = false;
-    auto notify = notifier(&succeded);
+    auto notify = notifier(aumi, &succeded);
 	if (succeded) {
 		auto end = _buffer.end();
 		for (auto it = _buffer.begin(); it != end; ++it) {

@@ -70,10 +70,8 @@ int wmain(int argc, LPWSTR* argv)
 
     // This is an app name that uses a shortcut within a subdirectory
     appName = L"Mobanisto\\Test Notifications";
-    appUserModelID = L"Test Notifications",
+    appUserModelID = L"Test Notifications";
 
-    WinToast::instance()->setAppName(appName);
-    WinToast::instance()->setAppUserModelId(appUserModelID);
     // WinToast::instance()->setShortcutPolicy(WinToast::SHORTCUT_POLICY_IGNORE);
 
     if (!WinToast::instance()->initialize()) {
@@ -81,15 +79,15 @@ int wmain(int argc, LPWSTR* argv)
         return Results::InitializationFailure;
     }
 
-    bool shellLinkExists = WinToast::instance()->doesShellLinkExist();
+    bool shellLinkExists = WinToast::instance()->doesShellLinkExist(appName);
     std::wcout << L"does shell link exist? " << shellLinkExists << std::endl;
 
     std::wstring aumi;
-    WinToast::instance()->getAumiFromShellLink(aumi);
+    WinToast::instance()->getAumiFromShellLink(appName, aumi);
     std::wcout << L"found aumi for shell link: " << aumi << std::endl;
 
-    WinToast::instance()->initializeShortcut();
-    WinToast::instance()->setProcessAumi();
+    WinToast::instance()->initializeShortcut(appName, aumi);
+    // WinToast::instance()->setProcessAumi(aumi);
 
     bool withImage = (imagePath != NULL);
     WinToastTemplate templ(withImage ? WinToastTemplate::ImageAndText02 : WinToastTemplate::Text02);
@@ -101,7 +99,7 @@ int wmain(int argc, LPWSTR* argv)
     if (withImage)
         templ.setImagePath(imagePath);
 
-    if (WinToast::instance()->showToast(templ, new CustomHandler()) < 0) {
+    if (WinToast::instance()->showToast(aumi, templ, new CustomHandler()) < 0) {
         std::wcerr << L"Could not launch your toast notification!";
         return Results::ToastFailed;
     }
@@ -109,6 +107,6 @@ int wmain(int argc, LPWSTR* argv)
     // Give the handler a chance for 15 seconds
     Sleep(15000);
 
-    WinToast::instance()->clear();
+    WinToast::instance()->clear(aumi);
     exit(0);
 }
