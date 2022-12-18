@@ -1,10 +1,13 @@
-package de.mobanisto.wintoast;
+package de.mobanisto.toast4j;
 
+import de.mobanisto.wintoast.WinToast;
 import org.bytedeco.javacpp.CharPointer;
 
-public class TestLookForSomeAumis {
+import static de.mobanisto.wintoast.WinToastTemplate.WinToastTemplateType.ToastText02;
 
-    public static void main(String[] args) {
+public class TestDifferentIcons {
+
+    public static void main(String[] args) throws InterruptedException {
         WinToast wintoast = WinToast.instance();
         wintoast.initialize();
         for (String appName : new String[]{
@@ -19,11 +22,18 @@ public class TestLookForSomeAumis {
             }
             boolean aumiFound = wintoast.getAumiFromShellLink(new CharPointer(appName), aumi);
             if (aumiFound) {
-                System.out.println(String.format("App name: %s. Found AUMI: %s", appName, aumi.getString()));
-            } else {
-                System.out.println(String.format("App name: %s. AUMI not found", appName));
+                showNotification(appName, aumi.getString());
             }
         }
+    }
+
+    private static void showNotification(String appName, String aumi) throws InterruptedException {
+        Toaster toastHelper = Toaster.forAumi(aumi);
+        ToastHandle toast = toastHelper.showToast(new ToastBuilder(ToastText02)
+                .setLine1(String.format("%s: You've got 7 new messages", appName)).build());
+        Thread.sleep(3000);
+        toast.hide();
+        Thread.sleep(1000);
     }
 
 }

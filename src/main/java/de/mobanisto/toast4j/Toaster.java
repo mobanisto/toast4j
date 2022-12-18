@@ -1,4 +1,4 @@
-package de.mobanisto.wintoast.helper;
+package de.mobanisto.toast4j;
 
 import de.mobanisto.wintoast.Aumi;
 import de.mobanisto.wintoast.IWinToastHandler;
@@ -9,9 +9,9 @@ import org.bytedeco.javacpp.IntPointer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class WinToastHelper {
+public class Toaster {
 
-    final static Logger logger = LoggerFactory.getLogger(WinToastHelper.class);
+    final static Logger logger = LoggerFactory.getLogger(Toaster.class);
     private static class AppName {
 
         private String appName;
@@ -26,19 +26,19 @@ public class WinToastHelper {
 
     private final String aumi;
 
-    public static WinToastHelper forAumi(String aumi) {
-        return new WinToastHelper(aumi);
+    public static Toaster forAumi(String aumi) {
+        return new Toaster(aumi);
     }
 
-    public static WinToastHelper forAumi(Aumi aumi) {
-        return new WinToastHelper(aumi);
+    public static Toaster forAumi(Aumi aumi) {
+        return new Toaster(aumi);
     }
 
-    public static WinToastHelper forAppName(String appName) {
-        return new WinToastHelper(new AppName(appName));
+    public static Toaster forAppName(String appName) {
+        return new Toaster(new AppName(appName));
     }
 
-    private WinToastHelper(AppName appName) {
+    private Toaster(AppName appName) {
         winToast = WinToast.instance();
         CharPointer aumiResult = new CharPointer();
         boolean aumiFound = winToast.getAumiFromShellLink(new CharPointer(appName.appName), aumiResult);
@@ -46,12 +46,12 @@ public class WinToastHelper {
         aumi = aumiResult.getString();
     }
 
-    private WinToastHelper(String aumi) {
+    private Toaster(String aumi) {
         this.aumi = aumi;
         winToast = WinToast.instance();
     }
 
-    private WinToastHelper(Aumi aumi) {
+    private Toaster(Aumi aumi) {
         winToast = WinToast.instance();
         CharPointer aumiResult = winToast.configureAUMI(new CharPointer(aumi.getCompanyName()),
                 new CharPointer(aumi.getProductName()), new CharPointer(aumi.getSubProduct()),

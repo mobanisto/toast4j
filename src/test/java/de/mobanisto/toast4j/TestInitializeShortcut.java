@@ -1,13 +1,5 @@
-package de.mobanisto.wintoast;
+package de.mobanisto.toast4j;
 
-import de.mobanisto.wintoast.helper.ToastBuilder;
-import de.mobanisto.wintoast.helper.ToastHandle;
-import de.mobanisto.wintoast.helper.WinToastHelper;
-
-import java.nio.file.Path;
-import java.nio.file.Paths;
-
-import static de.mobanisto.wintoast.WinToastTemplate.WinToastTemplateType.ToastImageAndText02;
 import static de.mobanisto.wintoast.WinToastTemplate.WinToastTemplateType.ToastText02;
 
 public class TestInitializeShortcut {
@@ -33,9 +25,10 @@ public class TestInitializeShortcut {
         // WinToast can also attempt to create a shortcut for you, however it won't
         // currently create subdirectories, i.e. you need to make sure that
         // the subdirectory 'Company' exists in '$ProgramData\Microsoft\Windows\Start Menu\Programs'.
+
         String aumi = "Test Notifications";
         String appName = "Mobanisto\\Test Notifications";
-        WinToastHelper toastHelper = WinToastHelper.forAumi(aumi);
+        Toaster toastHelper = Toaster.forAumi(aumi);
         boolean initialized = toastHelper.initialize();
         if (!initialized) {
             return;

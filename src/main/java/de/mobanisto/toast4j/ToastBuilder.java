@@ -1,4 +1,4 @@
-package de.mobanisto.wintoast.helper;
+package de.mobanisto.toast4j;
 
 import de.mobanisto.wintoast.WinToastTemplate;
 import de.mobanisto.wintoast.WinToastTemplate.AudioOption;
