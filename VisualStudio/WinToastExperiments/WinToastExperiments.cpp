@@ -3,7 +3,7 @@
 
 using namespace WinToastLib;
 
-class CustomHandler : public IWinToastHandler {
+class CustomHandler : public WinToastHandler {
 public:
     void toastActivated() const {
         std::wcout << L"The user clicked in this toast" << std::endl;

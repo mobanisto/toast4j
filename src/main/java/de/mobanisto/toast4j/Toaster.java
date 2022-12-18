@@ -1,8 +1,8 @@
 package de.mobanisto.toast4j;
 
 import de.mobanisto.wintoast.Aumi;
-import de.mobanisto.wintoast.IWinToastHandler;
 import de.mobanisto.wintoast.WinToast;
+import de.mobanisto.wintoast.WinToastHandler;
 import de.mobanisto.wintoast.WinToastTemplate;
 import org.bytedeco.javacpp.CharPointer;
 import org.bytedeco.javacpp.IntPointer;
@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 public class Toaster {
 
     final static Logger logger = LoggerFactory.getLogger(Toaster.class);
+
     private static class AppName {
 
         private String appName;
@@ -66,33 +67,38 @@ public class Toaster {
         return success;
     }
 
-    private final IWinToastHandler defaultWinToastHandler = new IWinToastHandler() {
+    private final WinToastHandler defaultWinToastHandler = new WinToastHandler() {
         @Override
         public void toastActivated() {
-            logger.info("toast activated");
+            logger.debug("toast activated");
         }
 
         @Override
         public void toastActivated(int actionIndex) {
-            logger.info("toast activated: " + actionIndex);
+            logger.debug("toast activated: " + actionIndex);
         }
 
         @Override
         public void toastDismissed(int state) {
-            logger.info("toast dismissed: " + state);
+            logger.debug("toast dismissed: " + state);
         }
 
         @Override
         public void toastFailed() {
-            logger.info("toast failed");
+            logger.warn("toast failed");
         }
     };
 
     public ToastHandle showToast(WinToastTemplate template) {
+        return showToast(template, null);
+    }
+
+    public ToastHandle showToast(WinToastTemplate template, WinToastHandler handler) {
+        WinToastHandler h = handler != null ? handler : defaultWinToastHandler;
         IntPointer errorCode = new IntPointer(0);
-        long uid = winToast.showToast(new CharPointer(aumi), template, defaultWinToastHandler, errorCode);
-        logger.info("toast uid: " + uid);
-        logger.info("error code: " + winToast.strerror(errorCode.get()).getString());
+        long uid = winToast.showToast(new CharPointer(aumi), template, h, errorCode);
+        logger.debug("toast uid: " + uid);
+        logger.debug("error code: " + winToast.strerror(errorCode.get()).getString());
         return new ToastHandle(this, uid);
     }
 

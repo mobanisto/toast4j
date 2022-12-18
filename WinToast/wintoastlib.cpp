@@ -270,7 +270,7 @@ namespace Util {
         return hr;
     }
 
-    inline HRESULT setEventHandlers(_In_ IToastNotification* notification, _In_ std::shared_ptr<IWinToastHandler> eventHandler, _In_ INT64 expirationTime) {
+    inline HRESULT setEventHandlers(_In_ IToastNotification* notification, _In_ std::shared_ptr<WinToastHandler> eventHandler, _In_ INT64 expirationTime) {
         EventRegistrationToken activatedToken, dismissedToken, failedToken;
         HRESULT hr = notification->add_Activated(
                     Callback < Implements < RuntimeClassFlags<ClassicCom>,
@@ -304,7 +304,7 @@ namespace Util {
                      {
                          if (reason == ToastDismissalReason_UserCanceled && expirationTime && InternalDateTime::Now() >= expirationTime)
                             reason = ToastDismissalReason_TimedOut;
-                         eventHandler->toastDismissed(static_cast<IWinToastHandler::WinToastDismissalReason>(reason));
+                         eventHandler->toastDismissed(static_cast<WinToastHandler::WinToastDismissalReason>(reason));
                      }
                      return S_OK;
                  }).Get(), &dismissedToken);
@@ -679,7 +679,7 @@ HRESULT	WinToast::createShellLinkHelper(_In_ const std::wstring& appname, _In_ c
     return hr;
 }
 
-INT64 WinToast::showToast(_In_ const std::wstring& aumi, _In_ const WinToastTemplate& toast, _In_  IWinToastHandler* handler, _Out_ WinToastError* error)  {
+INT64 WinToast::showToast(_In_ const std::wstring& aumi, _In_ const WinToastTemplate& toast, _In_  WinToastHandler* handler, _Out_ WinToastError* error)  {
     setError(error, WinToastError::NoError);
     INT64 id = -1;
     if (!isInitialized()) {
@@ -757,7 +757,7 @@ INT64 WinToast::showToast(_In_ const std::wstring& aumi, _In_ const WinToastTemp
                                 }
 
                                 if (SUCCEEDED(hr)) {
-                                    hr = Util::setEventHandlers(notification.Get(), std::shared_ptr<IWinToastHandler>(handler), expiration);
+                                    hr = Util::setEventHandlers(notification.Get(), std::shared_ptr<WinToastHandler>(handler), expiration);
                                     if (FAILED(hr)) {
                                         setError(error, WinToastError::InvalidHandler);
                                     }

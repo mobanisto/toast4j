@@ -8,12 +8,12 @@ import org.bytedeco.javacpp.annotation.*;
 @NoOffset
 @Properties(inherit = WinToastLib.class)
 // @Namespace("WinToastLib")
-public class IWinToastHandler extends Pointer {
+public class WinToastHandler extends Pointer {
     static {
         Loader.load();
     }
 
-    public IWinToastHandler() {
+    public WinToastHandler() {
         allocate();
     }
 
@@ -29,7 +29,7 @@ public class IWinToastHandler extends Pointer {
 
     public @Virtual(true)
     @Const({false, false, true})
-    native void toastDismissed(@Cast("IWinToastHandler::WinToastDismissalReason") int state);
+    native void toastDismissed(@Cast("WinToastHandler::WinToastDismissalReason") int state);
 
     public @Virtual(true)
     @Const({false, false, true})

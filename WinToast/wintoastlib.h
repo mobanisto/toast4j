@@ -47,14 +47,14 @@ using namespace Windows::Foundation;
 
 namespace WinToastLib {
 
-    class IWinToastHandler {
+    class WinToastHandler {
     public:
         enum WinToastDismissalReason {
             UserCanceled = ToastDismissalReason::ToastDismissalReason_UserCanceled,
             ApplicationHidden = ToastDismissalReason::ToastDismissalReason_ApplicationHidden,
             TimedOut = ToastDismissalReason::ToastDismissalReason_TimedOut
         };
-        virtual ~IWinToastHandler() = default;
+        virtual ~WinToastHandler() = default;
         virtual void toastActivated() const = 0;
         virtual void toastActivated(int actionIndex) const = 0;
         virtual void toastDismissed(WinToastDismissalReason state) const = 0;
@@ -192,7 +192,7 @@ namespace WinToastLib {
         virtual bool initializeShortcut(_In_ const std::wstring& appname, _In_ const std::wstring& aumi, _In_ bool updateExisting, _Out_opt_ WinToastError* error = nullptr);
         virtual bool setProcessAumi(_In_ const std::wstring& aumi, _Out_opt_ WinToastError* error = nullptr);
         virtual bool hideToast(_In_ const std::wstring& aumi, _In_ INT64 id);
-        virtual INT64 showToast(_In_ const std::wstring& aumi, _In_ const WinToastTemplate& toast, _In_ IWinToastHandler* handler, _Out_opt_ WinToastError* error = nullptr);
+        virtual INT64 showToast(_In_ const std::wstring& aumi, _In_ const WinToastTemplate& toast, _In_ WinToastHandler* handler, _Out_opt_ WinToastError* error = nullptr);
         virtual void clear(_In_ const std::wstring& aumi);
         virtual enum ShortcutResult createShortcut(_In_ const std::wstring& appname, _In_ const std::wstring& aumi, _In_ bool updateExisting);
         virtual bool doesShellLinkExist(_In_ const std::wstring& appname);

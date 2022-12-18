@@ -23,7 +23,7 @@ public class WinToast extends Pointer {
     public native @Cast("uint32_t") long showToast(
             @Const @StdWString CharPointer aumi,
             @Const @ByRef WinToastTemplate winToastTemplate,
-            IWinToastHandler iWinToastHandler,
+            WinToastHandler winToastHandler,
             @Cast("WinToastLib::WinToast::WinToastError *") IntPointer erro);
 
     public native @StdWString CharPointer configureAUMI(@Const @StdWString CharPointer companyName,
