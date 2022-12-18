@@ -7,8 +7,12 @@ import de.mobanisto.wintoast.WinToastTemplate;
 import de.mobanisto.wintoast.WinToastTemplate.WinToastTemplateType;
 import org.bytedeco.javacpp.CharPointer;
 import org.bytedeco.javacpp.IntPointer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class WinToastHelper {
+
+    final static Logger logger = LoggerFactory.getLogger(WinToastHelper.class);
 
     private final WinToast winToast;
 
@@ -31,44 +35,44 @@ public class WinToastHelper {
         CharPointer aumiResult = winToast.configureAUMI(new CharPointer(aumi.getCompanyName()),
                 new CharPointer(aumi.getProductName()), new CharPointer(aumi.getSubProduct()),
                 new CharPointer(aumi.getVersionInformation()));
-        System.out.println("aumi: " + aumiResult.getString());
+        logger.info("aumi: " + aumiResult.getString());
         winToast.setAppUserModelId(aumiResult);
     }
 
     public boolean initialize()
     {
         boolean success = winToast.initialize();
-        System.out.println("initialize: " + success);
+        logger.info("initialize: " + success);
         return success;
     }
 
     private IWinToastHandler iWinToastHandler = new IWinToastHandler() {
         @Override
         public void toastActivated() {
-            System.out.println("toast activated");
+            logger.info("toast activated");
         }
 
         @Override
         public void toastActivated(int actionIndex) {
-            System.out.println("toast activated: " + actionIndex);
+            logger.info("toast activated: " + actionIndex);
         }
 
         @Override
         public void toastDismissed(int state) {
-            System.out.println("toast dismissed: " + state);
+            logger.info("toast dismissed: " + state);
         }
 
         @Override
         public void toastFailed() {
-            System.out.println("toast failed");
+            logger.info("toast failed");
         }
     };
 
     public ToastHandle showToast(WinToastTemplate template) {
         IntPointer errorCode = new IntPointer(0);
         long uid = winToast.showToast(template, iWinToastHandler, errorCode);
-        System.out.println("toast uid: " + uid);
-        System.out.println("error code: " + winToast.strerror(errorCode.get()).getString());
+        logger.info("toast uid: " + uid);
+        logger.info("error code: " + winToast.strerror(errorCode.get()).getString());
         return new ToastHandle(this, uid);
     }
 

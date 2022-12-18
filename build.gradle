@@ -25,6 +25,8 @@ targetCompatibility = 1.8
 
 dependencies {
     api 'org.bytedeco:javacpp:1.5.7'
+    api 'org.slf4j:slf4j-api:2.0.6'
+    testImplementation 'ch.qos.logback:logback-classic:1.4.5'
 }
 
 java {
