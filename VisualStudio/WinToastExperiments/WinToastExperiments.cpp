@@ -72,8 +72,6 @@ int wmain(int argc, LPWSTR* argv)
     appName = L"Mobanisto\\Test Notifications";
     appUserModelID = L"Test Notifications";
 
-    // WinToast::instance()->setShortcutPolicy(WinToast::SHORTCUT_POLICY_IGNORE);
-
     if (!WinToast::instance()->initialize()) {
         std::wcerr << L"Error, your system in not compatible!" << std::endl;
         return Results::InitializationFailure;
@@ -86,7 +84,7 @@ int wmain(int argc, LPWSTR* argv)
     WinToast::instance()->getAumiFromShellLink(appName, aumi);
     std::wcout << L"found aumi for shell link: " << aumi << std::endl;
 
-    WinToast::instance()->initializeShortcut(appName, aumi);
+    WinToast::instance()->initializeShortcut(appName, aumi, false);
     // WinToast::instance()->setProcessAumi(aumi);
 
     bool withImage = (imagePath != NULL);

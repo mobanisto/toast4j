@@ -387,10 +387,6 @@ WinToast::~WinToast() {
     }
 }
 
-void WinToast::setShortcutPolicy(_In_ ShortcutPolicy shortcutPolicy) {
-    _shortcutPolicy = shortcutPolicy;
-}
-
 bool WinToast::isCompatible() {
 	DllImporter::initialize();
     return !((DllImporter::SetCurrentProcessExplicitAppUserModelID == nullptr)
@@ -442,7 +438,7 @@ const std::wstring& WinToast::strerror(WinToastError error) {
     return iter->second;
 }
 
-enum WinToast::ShortcutResult WinToast::createShortcut(_In_ const std::wstring& appname, _In_ const std::wstring& aumi) {
+enum WinToast::ShortcutResult WinToast::createShortcut(_In_ const std::wstring& appname, _In_ const std::wstring& aumi, _In_ bool updateExisting) {
     if (aumi.empty() || appname.empty()) {
         DEBUG_MSG(L"Error: App User Model Id or Appname is empty!");
         return SHORTCUT_MISSING_PARAMETERS;
@@ -458,7 +454,7 @@ enum WinToast::ShortcutResult WinToast::createShortcut(_In_ const std::wstring& 
     }
 
     bool wasChanged;
-    HRESULT hr = validateShellLinkHelper(appname, aumi, wasChanged);
+    HRESULT hr = validateShellLinkHelper(appname, aumi, updateExisting, wasChanged);
     if (SUCCEEDED(hr))
         return wasChanged ? SHORTCUT_WAS_CHANGED : SHORTCUT_UNCHANGED;
 
@@ -509,13 +505,11 @@ bool WinToast::isInitialized() const {
     return _isInitialized;
 }
 
-bool WinToast::initializeShortcut(_In_ const std::wstring& appname, _In_ const std::wstring& aumi, _Out_opt_ WinToastError* error) {
-    if (_shortcutPolicy != SHORTCUT_POLICY_IGNORE) {
-        if (createShortcut(appname, aumi) < 0) {
-            setError(error, WinToastError::ShellLinkNotCreated);
-            DEBUG_MSG(L"Error while attaching the AUMI to the current proccess =(");
-            return false;
-        }
+bool WinToast::initializeShortcut(_In_ const std::wstring& appname, _In_ const std::wstring& aumi, _In_ bool updateExisting, _Out_opt_ WinToastError* error) {
+    if (createShortcut(appname, aumi, updateExisting) < 0) {
+        setError(error, WinToastError::ShellLinkNotCreated);
+        DEBUG_MSG(L"Error while attaching the AUMI to the current proccess =(");
+        return false;
     }
     return true;
 }
@@ -529,7 +523,7 @@ bool WinToast::setProcessAumi(_In_ const std::wstring& aumi, _Out_opt_ WinToastE
     return true;
 }
 
-HRESULT	WinToast::validateShellLinkHelper(_In_ const std::wstring& appname, _In_ const std::wstring& aumi, _Out_ bool& wasChanged) {
+HRESULT	WinToast::validateShellLinkHelper(_In_ const std::wstring& appname, _In_ const std::wstring& aumi, _In_ bool updateExisting, _Out_ bool& wasChanged) {
 	WCHAR	path[MAX_PATH] = { L'\0' };
     Util::defaultShellLinkPath(appname, path);
     // Check if the file exist
@@ -564,7 +558,7 @@ HRESULT	WinToast::validateShellLinkHelper(_In_ const std::wstring& appname, _In_
                         hr = DllImporter::PropVariantToString(appIdPropVar, AUMI, MAX_PATH);
                         wasChanged = false;
                         if (FAILED(hr) || aumi != AUMI) {
-                            if (_shortcutPolicy == SHORTCUT_POLICY_REQUIRE_CREATE) {
+                            if (updateExisting) {
                                 // AUMI Changed for the same app, let's update the current value! =)
                                 wasChanged = true;
                                 PropVariantClear(&appIdPropVar);
@@ -644,10 +638,6 @@ bool WinToast::getAumiFromShellLink(_In_ const std::wstring& appname, _Out_ std:
 }
 
 HRESULT	WinToast::createShellLinkHelper(_In_ const std::wstring& appname, _In_ const std::wstring& aumi) {
-    if (_shortcutPolicy != SHORTCUT_POLICY_REQUIRE_CREATE) {
-      return E_FAIL;
-    }
-
 	WCHAR   exePath[MAX_PATH]{L'\0'};
 	WCHAR	slPath[MAX_PATH]{L'\0'};
     Util::defaultShellLinkPath(appname, slPath);

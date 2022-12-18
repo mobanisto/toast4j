@@ -113,8 +113,8 @@ public class WinToastHelper {
         return null;
     }
 
-    public void initializeShortcut(String appName) {
-        winToast.initializeShortcut(new CharPointer(appName), new CharPointer(aumi));
+    public void initializeShortcut(String appName, boolean updateExisting) {
+        winToast.initializeShortcut(new CharPointer(appName), new CharPointer(aumi), updateExisting);
     }
 
     public void setProcessAumi() {

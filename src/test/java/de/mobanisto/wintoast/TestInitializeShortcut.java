@@ -33,8 +33,8 @@ public class TestInitializeShortcut {
         // WinToast can also attempt to create a shortcut for you, however it won't
         // currently create subdirectories, i.e. you need to make sure that
         // the subdirectory 'Company' exists in '$ProgramData\Microsoft\Windows\Start Menu\Programs'.
-        String aumi = "Test Notifications Foo";
-        String appName = "Mobanisto\\Test Notifications Foo";
+        String aumi = "Test Notifications";
+        String appName = "Mobanisto\\Test Notifications";
         WinToastHelper toastHelper = WinToastHelper.forAumi(aumi);
         boolean initialized = toastHelper.initialize();
         if (!initialized) {
@@ -44,7 +44,7 @@ public class TestInitializeShortcut {
         System.out.println("Found shell link? " + doesShellLinkExist);
         String aumiFound = toastHelper.getAumiFromShellLink(appName);
         System.out.println("Found aumi: " + aumiFound);
-        toastHelper.initializeShortcut(appName);
+        toastHelper.initializeShortcut(appName, false);
 
         // Wait a moment, otherwise the first notification will not have the icon instantly.
         Thread.sleep(3000);

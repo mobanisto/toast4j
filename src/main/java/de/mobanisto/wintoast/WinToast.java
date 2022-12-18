@@ -31,12 +31,11 @@ public class WinToast extends Pointer {
                                                         @Const @StdWString CharPointer subProduct,
                                                         @Const @StdWString CharPointer versionInformation);
 
-    public native void setShortcutPolicy(@Cast("WinToastLib::WinToast::ShortcutPolicy") int code);
-
     public native boolean initialize();
 
     public native boolean initializeShortcut(@Const @StdWString CharPointer appName,
-                                             @Const @StdWString CharPointer aumi);
+                                             @Const @StdWString CharPointer aumi,
+                                             boolean updateExisting);
 
     public native boolean setProcessAumi(@Const @StdWString CharPointer aumi);
 
@@ -56,13 +55,4 @@ public class WinToast extends Pointer {
     public native boolean hideToast(@Const @StdWString CharPointer appName, long id);
 
     public native void allocate();
-
-    /**
-     * enum WinToastLib::WinToast::ShortcutPolicy
-     */
-    public static class ShortcutPolicy {
-        public static final int ShortcutPolicyIgnore = 0,
-                ShortcutPolicyRequireNoCreate = 1,
-                ShortcutPolicyRequireCreate = 2;
-    }
 }

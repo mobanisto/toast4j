@@ -34,17 +34,11 @@ public class TestShowSomeNotifications {
         // currently create subdirectories, i.e. you need to make sure that
         // the subdirectory 'Company' exists in '$ProgramData\Microsoft\Windows\Start Menu\Programs'.
         String aumi = "Test Notifications";
-        String appName = "Mobanisto\\Test Notifications";
         WinToastHelper toastHelper = WinToastHelper.forAumi(aumi);
         boolean initialized = toastHelper.initialize();
         if (!initialized) {
             return;
         }
-        boolean doesShellLinkExist = toastHelper.doesShellLinkExist(appName);
-        System.out.println("Found shell link? " + doesShellLinkExist);
-        String aumiFound = toastHelper.getAumiFromShellLink(appName);
-        System.out.println("Found aumi: " + aumiFound);
-        toastHelper.initializeShortcut(appName);
 
         Path cwd = Paths.get(System.getProperty("user.dir"));
         String image = cwd.resolve("example/terminal.png").toAbsolutePath().toString();
@@ -63,6 +57,8 @@ public class TestShowSomeNotifications {
                 new ToastBuilder(ToastImageAndText02).setLine1("Bar").setLine2("Goodbye").setImage(image).build());
         Thread.sleep(5000);
         toast3.hide();
+
+        Thread.sleep(3000);
     }
 
 }
