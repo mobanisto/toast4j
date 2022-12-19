@@ -41,10 +41,11 @@ public class Toaster {
 
     private Toaster(AppName appName) {
         winToast = WinToast.instance();
-        CharPointer aumiResult = new CharPointer();
-        boolean aumiFound = winToast.getAumiFromShellLink(new CharPointer(appName.appName), aumiResult);
-        if (!aumiFound) throw new IllegalArgumentException(String.format("Invalid app '%s'", appName));
-        aumi = aumiResult.getString();
+        try (CharPointer pAppName = new CharPointer(appName.appName); CharPointer pAumiResult = new CharPointer()) {
+            boolean aumiFound = winToast.getAumiFromShellLink(pAppName, pAumiResult);
+            if (!aumiFound) throw new IllegalArgumentException(String.format("Invalid app '%s'", appName));
+            aumi = pAumiResult.getString();
+        }
     }
 
     private Toaster(String aumi) {
@@ -54,11 +55,15 @@ public class Toaster {
 
     private Toaster(Aumi aumi) {
         winToast = WinToast.instance();
-        CharPointer aumiResult = winToast.configureAUMI(new CharPointer(aumi.getCompanyName()),
-                new CharPointer(aumi.getProductName()), new CharPointer(aumi.getSubProduct()),
-                new CharPointer(aumi.getVersionInformation()));
-        this.aumi = aumiResult.getString();
-        logger.info("aumi: " + aumiResult.getString());
+        try (CharPointer pCompanyName = new CharPointer(aumi.getCompanyName());
+             CharPointer pProductName = new CharPointer(aumi.getProductName());
+             CharPointer pSubProduct = new CharPointer(aumi.getSubProduct());
+             CharPointer pVersionInformation = new CharPointer(aumi.getVersionInformation())) {
+            CharPointer aumiResult = winToast.configureAUMI(pCompanyName,
+                    pProductName, pSubProduct, pVersionInformation);
+            this.aumi = aumiResult.getString();
+            logger.info("aumi: " + aumi);
+        }
     }
 
     /**
@@ -95,6 +100,7 @@ public class Toaster {
 
     /**
      * Show a toast using the default handler which does only print to the logger on activation and dismissal.
+     *
      * @return a toast handle that can be used to hide the toast later on.
      */
     public ToastHandle showToast(WinToastTemplate template) {
@@ -103,19 +109,24 @@ public class Toaster {
 
     /**
      * Show a toast using a custom handler.
+     *
      * @return a toast handle that can be used to hide the toast later on.
      */
     public ToastHandle showToast(WinToastTemplate template, WinToastHandler handler) {
         WinToastHandler h = handler != null ? handler : defaultWinToastHandler;
         IntPointer errorCode = new IntPointer(0);
-        long uid = winToast.showToast(new CharPointer(aumi), template, h, errorCode);
-        logger.debug("toast uid: " + uid);
-        logger.debug("error code: " + winToast.strerror(errorCode.get()).getString());
-        return new ToastHandle(this, uid);
+        try (CharPointer pAumi = new CharPointer(aumi)) {
+            long uid = winToast.showToast(pAumi, template, h, errorCode);
+            logger.debug("toast uid: " + uid);
+            logger.debug("error code: " + winToast.strerror(errorCode.get()).getString());
+            return new ToastHandle(this, uid);
+        }
     }
 
     public void hideToast(long uid) {
-        winToast.hideToast(new CharPointer(aumi), uid);
+        try (CharPointer pAumi = new CharPointer(aumi)) {
+            winToast.hideToast(pAumi, uid);
+        }
     }
 
     /**
@@ -130,10 +141,11 @@ public class Toaster {
      * the associated AUMI.
      */
     public String getAumiFromShellLink(String appName) {
-        CharPointer aumi = new CharPointer();
-        boolean success = winToast.getAumiFromShellLink(new CharPointer(appName), aumi);
-        if (success) {
-            return aumi.getString();
+        try (CharPointer pAppName = new CharPointer(appName); CharPointer pAumiResult = new CharPointer()) {
+            boolean success = winToast.getAumiFromShellLink(pAppName, pAumiResult);
+            if (success) {
+                return pAumiResult.getString();
+            }
         }
         return null;
     }
@@ -142,15 +154,20 @@ public class Toaster {
      * If no shortcut exists in the start menu, attempt to create one.
      */
     public void initializeShortcut(String appName, boolean updateExisting) {
-        winToast.initializeShortcut(new CharPointer(appName), new CharPointer(aumi), updateExisting);
+        try (CharPointer pAppName = new CharPointer(appName); CharPointer pAumi = new CharPointer(aumi)) {
+            winToast.initializeShortcut(pAppName, pAumi, updateExisting);
+        }
     }
 
     /**
      * Registers this Toaster's AUMI so that it identifies the current process to the taskbar.
-     * This identifier allows an application to group its associated processes and windows under a single taskbar button.
-     * See <a href="https://learn.microsoft.com/en-us/windows/win32/api/shobjidl_core/nf-shobjidl_core-setcurrentprocessexplicitappusermodelid">SetCurrentProcessExplicitAppUserModelID </a>
+     * This identifier allows an application to group its associated processes and windows under a single taskbar
+     * button. See
+     * <a href="https://learn.microsoft.com/en-us/windows/win32/api/shobjidl_core/nf-shobjidl_core-setcurrentprocessexplicitappusermodelid">SetCurrentProcessExplicitAppUserModelID </a>
      */
     public void setProcessAumi() {
-        winToast.setProcessAumi(new CharPointer(aumi));
+        try (CharPointer pAumi = new CharPointer()) {
+            winToast.setProcessAumi(pAumi);
+        }
     }
 }
