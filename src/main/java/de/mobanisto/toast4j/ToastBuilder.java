@@ -67,7 +67,19 @@ public class ToastBuilder {
         return this;
     }
 
-    public ToastBuilder setAudioOption(int audioOption) {
+    public ToastBuilder setDefaultAudio() {
+        return setAudioOption(AudioOption.Default);
+    }
+
+    public ToastBuilder setSilent() {
+        return setAudioOption(AudioOption.Silent);
+    }
+
+    public ToastBuilder setLoopAudio() {
+        return setAudioOption(AudioOption.Loop);
+    }
+
+    private ToastBuilder setAudioOption(int audioOption) {
         this.audioOption = audioOption;
         return this;
     }
