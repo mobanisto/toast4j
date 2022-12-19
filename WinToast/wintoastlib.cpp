@@ -649,28 +649,24 @@ HRESULT	WinToast::createShellLinkHelper(_In_ const std::wstring& appname, _In_ c
         if (SUCCEEDED(hr)) {
             hr = shellLink->SetArguments(L"");
             if (SUCCEEDED(hr)) {
-                // TODO: path of exe as working dir is not valid
-                hr = shellLink->SetWorkingDirectory(exePath);
+                ComPtr<IPropertyStore> propertyStore;
+                hr = shellLink.As(&propertyStore);
                 if (SUCCEEDED(hr)) {
-                    ComPtr<IPropertyStore> propertyStore;
-                    hr = shellLink.As(&propertyStore);
+                    PROPVARIANT appIdPropVar;
+                    hr = InitPropVariantFromString(aumi.c_str(), &appIdPropVar);
                     if (SUCCEEDED(hr)) {
-                        PROPVARIANT appIdPropVar;
-                        hr = InitPropVariantFromString(aumi.c_str(), &appIdPropVar);
+                        hr = propertyStore->SetValue(PKEY_AppUserModel_ID, appIdPropVar);
                         if (SUCCEEDED(hr)) {
-                            hr = propertyStore->SetValue(PKEY_AppUserModel_ID, appIdPropVar);
+                            hr = propertyStore->Commit();
                             if (SUCCEEDED(hr)) {
-                                hr = propertyStore->Commit();
+                                ComPtr<IPersistFile> persistFile;
+                                hr = shellLink.As(&persistFile);
                                 if (SUCCEEDED(hr)) {
-                                    ComPtr<IPersistFile> persistFile;
-                                    hr = shellLink.As(&persistFile);
-                                    if (SUCCEEDED(hr)) {
-                                        hr = persistFile->Save(slPath, TRUE);
-                                    }
+                                    hr = persistFile->Save(slPath, TRUE);
                                 }
                             }
-                            PropVariantClear(&appIdPropVar);
                         }
+                        PropVariantClear(&appIdPropVar);
                     }
                 }
             }
